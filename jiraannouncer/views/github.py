@@ -86,7 +86,7 @@ def github(request):
                        f"\x03 in \x0306{request['repository']['name']}\x03. \x02\x0311"
                        f"{request['pull_request']['html_url']}\x02\x03")
         else:
-            message = (f"\x0314{request['sender']['login']}\x03"
+            message = (f"\x0314{request['sender']['login']}\x03 "
                        f"{'merged' if request['pull_request']['merged'] else request['action']}"
                        f" pull request #{str(request['number'])}: \"{request['pull_request']['title']}"
                        f"\" from \x0306{headref}\x03 to \x0306{request['pull_request']['base']['ref']}"
@@ -152,13 +152,13 @@ def github(request):
             message = (f"\x0314{request['sender']['login']}\x03 created {request['ref_type']} \"{request['ref']}\""
                        f" in \x0306{request['repository']['name']} \x03.")
         else:
-            logprint("Unhandled create ref:" + request['ref_type'])
+            logprint(f"Unhandled create ref: {request['ref_type']}")
             return
     elif event == 'status':
         logprint("Ignored github status event")
         return
     else:
-        logprint("GitHub unhandled event: " + event)
+        logprint(f"GitHub unhandled event: {event}")
         jsondump(request)
         return
     msgshort = {"time": time.time(), "type": event, "key": "GitHub", "full": message}
@@ -168,4 +168,4 @@ def github(request):
     else:
         if domessage:
             for channel in channels:
-                send(channel, "[\x0315GitHub\x03] " + message, msgshort)
+                send(channel, f"[\x0315GitHub\x03] {message}", msgshort)

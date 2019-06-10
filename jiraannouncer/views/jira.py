@@ -42,7 +42,12 @@ def jira(request):
         channels = ["#rattech"]
 
     domessage = True
-    fields = data['issue']['fields']
+    if 'issue' in data:
+        fields = data['issue']['fields']
+    else:
+        logprint("No issue key in JIRA webhook body, dumping:")
+        logprint(request.body)
+        return
     if request_type == 'jira:issue_created':
         if "OV-" in issue_key or "DRR-" in issue_key:
             message = (f"\x0307{fields['issuetype']['name']}"
@@ -168,6 +173,8 @@ def jira(request):
             squadstatuschange is False):
         logprint("Duplicate message, skipping:")
         logprint(message)
-    elif domessage is True:
+        return
+    elif domessage:
         for channel in channels:
-            send(channel, "[\x0315JIRA\x03] " + message, msgshort)
+            send(channel, f"[\x0315JIRA\x03] {message}", msgshort)
+        return

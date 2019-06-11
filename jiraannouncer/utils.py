@@ -1,9 +1,8 @@
-import re
-import time
-import pickle
-import sys
 import logging
-
+import pickle
+import re
+import sys
+import time
 from xmlrpc.client import ServerProxy, Error
 
 logging.basicConfig(filename='webhook.log', level=logging.DEBUG)
@@ -16,10 +15,9 @@ def logprint(string):
 
 def jsondump(string):
     """Convert input to string, and dump to jsondump file, ignoring non-ascii characters."""
-    dumpfile = open("jsondump.log", "a")
-    dumpfile.write(time.strftime("[%H:%M:%S]", time.gmtime()) + ":\n")
-    dumpfile.write(str(string).encode('ascii', 'ignore').decode() + "\n")
-    dumpfile.close()
+    with open("jsondump.log", "a") as dumpfile:
+        dumpfile.write(time.strftime("[%H:%M:%S]", time.gmtime()) + ":\n")
+        dumpfile.write(str(string).encode('ascii', 'ignore').decode() + "\n\n")
 
 
 def demarkdown(string):
@@ -36,8 +34,8 @@ def send(channel, message, msgshort):
     try:
         messagesplit = [message[i:i + 475] for i in range(0, len(message), 475)]
         for msgpart in messagesplit:
-            logprint(time.strftime("[%H:%M:%S]", time.gmtime()) + " Sending to " + channel + "...")
-            logprint(proxy.command("botserv", "ABish", "say " + channel + " " + msgpart))
+            logprint(f"{time.strftime('[%H:%M:%S]', time.gmtime())} Sending to {channel}...")
+            logprint(proxy.command("botserv", "ABish", f"say {channel} {msgpart}"))
             # logprint(msgpart)
             time.sleep(0.5)
         pickle.dump(msgshort, open("lastmessage.p", "wb"))

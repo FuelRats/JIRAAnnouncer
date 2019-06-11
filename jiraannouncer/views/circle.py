@@ -1,6 +1,6 @@
 import time
-import simplejson
 
+import simplejson
 from pyramid.view import view_config
 
 from ..utils import logprint, jsondump, send, getlast
@@ -12,7 +12,12 @@ OFFSET = 5
 def circle(request):
     """Handle CircleCI events"""
     lastmessage = getlast()
-    data = simplejson.loads(request.body)['payload']
+    try:
+        data = simplejson.loads(request.body)['payload']
+    except simplejson.errors.JSONDecodeError:
+        logprint("Failed to decode JSON from Circle. Dump:")
+        logprint(request.body)
+        return
     if 'reponame' not in data:
         logprint("No repository name in request!")
         data['reponame'] = "Unset"

@@ -2,8 +2,8 @@ import time
 
 from pyramid.view import view_config
 
-from ..utils import logprint, send
 from ..models import faillog
+from ..utils import logprint, send
 
 
 @view_config(route_name='client', renderer="json")
@@ -24,7 +24,6 @@ def client(request):
         model = faillog.FailLog(timestamp=time.time(), headers=request.headers, endpoint="client", body=request.body)
 
         query = request.dbsession.query(faillog.FailLog)
-
 
     if 'extradata' not in request.params:
         message = f"Incoming Client: {cmdrname} - System: {system} - Platform: {platform} - O2: {o2status}"

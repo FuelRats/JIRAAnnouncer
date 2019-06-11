@@ -10,6 +10,7 @@ from .jiramodels import JIRAMessage
 from .circlemodels import CircleMessage
 from .travismodels import TravisMessage
 from .githubmodels import GitHubMessage
+from .faillog import FailLog
 
 # run configure_mappers after defining all of the models to ensure
 # all relationships can be setup

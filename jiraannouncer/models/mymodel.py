@@ -3,8 +3,6 @@ from sqlalchemy import (
     Index,
     Integer,
     Text,
-    BigInteger,
-    JSON,
 )
 
 from .meta import Base

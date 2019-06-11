@@ -140,7 +140,7 @@ def github(request):
                        f"{request['commits'][0]['message']}\" to \x0306{request['repository']['name']}/"
                        f"{request['ref'].split('/')[-1]}\x03. \x02\x0311{request['compare']}\x02\x03")
         else:
-            message = (f"\x0314{request['sender']['login']}\x03 pushed{str(len(request['commits']))}commits to \x0306" 
+            message = (f"\x0314{request['sender']['login']}\x03 pushed {str(len(request['commits']))} commits to \x0306" 
                        f"{request['repository']['name']}/{request['ref'].split('/')[-1]}\x03. \x02\x0311"
                        f"{request['compare']}\x02\x03")
     elif event == 'commit_comment':

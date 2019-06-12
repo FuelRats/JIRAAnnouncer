@@ -167,5 +167,8 @@ def github(request):
         logprint(message)
     else:
         if domessage:
+            if request['sender']['login'] is "dependabot[bot]" and event != "pull_request":
+                logprint("Discarding Dependabot message.")
+                return
             for channel in channels:
                 send(channel, f"[\x0315GitHub\x03] {message}", msgshort)

@@ -109,7 +109,7 @@ def github(request):
 
         message = (f"\x0314{request['sender']['login']}\x03 {action}\x03 review of \x0314" 
                    f"{request['pull_request']['user']['login']}\x03's pull request #"
-                   f"{str(request['pull_request']['number'])}: \"{demarkdown(request['review']['body'] or '')}\""
+                   f"{str(request['pull_request']['number'])}: \"{demarkdown(request['review']['body'] or '')}\" "
                    f"in \x0306{request['repository']['name']}\x03. "
                    f"\x02\x0311{request['review']['html_url']}\x02\x03")
         logprint(f"Raw message: {message}")
@@ -130,7 +130,7 @@ def github(request):
                 logprint("Hound comment suppressed")
         else:
             message = (f"\x0314{request['sender']['login']}\x03 {request['action']} comment on pull request #" 
-                       f"{str(request['pull_request']['number'])}: \"{demarkdown(request['comment']['body'])}\""
+                       f"{str(request['pull_request']['number'])}: \"{demarkdown(request['comment']['body'])}\" "
                        f"in \x0306{request['repository']['name']}\x03. \x02\x0311{request['comment']['html_url']}"
                        f"\x02\x03")
     elif event == 'push':

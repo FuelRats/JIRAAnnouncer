@@ -4,7 +4,7 @@ import urllib
 import simplejson
 from pyramid.view import view_config
 
-from ..utils import logprint, send, getlast
+from ..utils import logprint, send, getlast, devsay
 
 OFFSET = 5
 
@@ -20,9 +20,10 @@ def travis(request):
         return
     try:
         request = simplejson.loads(urllib.parse.unquote(data[8:]))
-    except:
+    except simplejson.errors.JSONDecodeError:
         logprint("Error loading Travis payload:")
         logprint(data)
+        devsay("Travis couldn't decode a payload! Absolver, check the log.")
         return
 
     if "FuelRats/pipsqueak3" in repo:

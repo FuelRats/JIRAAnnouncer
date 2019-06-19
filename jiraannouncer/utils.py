@@ -13,6 +13,11 @@ def logprint(string):
     logging.debug(str(string).encode('ascii', 'ignore').decode())
 
 
+def devsay(string):
+    """Sends a message to the Announcer dev channel for debugging/reporting purposes."""
+    send("#announcerdev", string, '')
+
+
 def jsondump(string):
     """Convert input to string, and dump to jsondump file, ignoring non-ascii characters."""
     with open("jsondump.log", "a") as dumpfile:

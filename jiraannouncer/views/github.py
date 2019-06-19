@@ -7,7 +7,7 @@ from sys import hexversion
 
 from pyramid.view import view_config
 
-from ..utils import logprint, jsondump, send, getlast, demarkdown
+from ..utils import logprint, jsondump, send, getlast, demarkdown, devsay
 from ..models import githubmodels
 
 OFFSET = 5
@@ -25,8 +25,8 @@ def github(request):
 
     if 'X-GitHub-Event' not in request.headers:
         logprint("Malformed request to GitHub webhook handler (Missing X-Github-Event)")
-        send("#announcerdev",
-             "[\x0315GitHub\x03] Malformed request to GitHub webhook handler (Missing X-GitHub-Event header)", "Fail!")
+        devsay(
+             "[\x0315GitHub\x03] Malformed request to GitHub webhook handler (Missing X-GitHub-Event header)")
         return
 
     if github_secret is not None:
@@ -49,14 +49,16 @@ def github(request):
             if not str(mac.hexdigest()) == str(signature):
                 logprint("Signature mismatch! GitHub event not parsed.")
                 logprint(f"{mac.hexdigest()} vs {str(signature)}")
+                devsay(f"Invalid MAC in GitHub message: {str(signature)}")
                 return
 
     event = request.headers['X-GitHub-Event']
     try:
         request = simplejson.loads(data)
-    except:
+    except simplejson.errors.JSONDecodeError:
         logprint("Error loading GitHub payload:")
         logprint(data)
+        devsay("A GitHub payload failed to decode to JSON!")
         return
     domessage = True
     if 'repository' in request and request['repository']['name'] in ["pipsqueak3", "limpet", "MechaChainsaw"]:
@@ -153,6 +155,7 @@ def github(request):
                        f" in \x0306{request['repository']['name']} \x03.")
         else:
             logprint(f"Unhandled create ref: {request['ref_type']}")
+            devsay(f"An unhandled create ref was passed to GitHub: {request['ref_type']}. Absolver should implement!")
             return
     elif event == 'status':
         logprint("Ignored github status event")
@@ -160,6 +163,7 @@ def github(request):
     else:
         logprint(f"GitHub unhandled event: {event}")
         jsondump(request)
+        devsay(f"An unhandled GitHub event was passed: {event}. Absolver should implement!")
         return
     msgshort = {"time": time.time(), "type": event, "key": "GitHub", "full": message}
     if lastmessage['full'] == message:

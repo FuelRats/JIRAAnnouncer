@@ -4,7 +4,7 @@ import time
 import simplejson
 from pyramid.view import view_config
 
-from ..utils import logprint, send, getlast
+from ..utils import logprint, send, getlast, devsay
 
 OFFSET = 5
 
@@ -18,6 +18,7 @@ def jira(request):
     except simplejson.errors.JSONDecodeError:
         logprint("Failed to decode JSON from body. Dump:")
         logprint(request.body)
+        devsay("A JIRA payload couldn't be decoded. Absolver, check the logfile!")
         return
     request_type = data['webhookEvent']
 
@@ -47,6 +48,7 @@ def jira(request):
     else:
         logprint("No issue key in JIRA webhook body, dumping:")
         logprint(request.body)
+        devsay("JIRA webhook fired with no issue key.")
         return
     if request_type == 'jira:issue_created':
         if "OV-" in issue_key or "DRR-" in issue_key:
@@ -155,6 +157,7 @@ def jira(request):
                    f" ({data['project']['projectLead']['displayName']})")
     else:
         message = "JIRA unhandled event: " + request_type
+        devsay(f"An unhandled JIRA event '{request_type}' was passed to webhook. Absolver should implement.")
         logprint(message)
         return
 

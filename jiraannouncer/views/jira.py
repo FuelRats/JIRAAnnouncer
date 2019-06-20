@@ -48,7 +48,6 @@ def jira(request):
     else:
         logprint("No issue key in JIRA webhook body, dumping:")
         logprint(request.body)
-        devsay("JIRA webhook fired with no issue key.")
         fields = data
     if request_type == 'jira:issue_created':
         if "OV-" in issue_key or "DRR-" in issue_key:

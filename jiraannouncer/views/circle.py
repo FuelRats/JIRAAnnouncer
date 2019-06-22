@@ -32,7 +32,7 @@ def circle(request):
         else:
             channels = ['#rattech']
 
-    if 'compare' not in data:
+    if 'compare' not in data or data['compare'] is None:
         logprint(f"No compare URL in CircleCI data, dumping: {data}")
         if len(data['all_commit_details']) > 0:
             compareurl = data['all_commit_details'][0]['commit_url']

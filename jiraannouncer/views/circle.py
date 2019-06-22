@@ -42,6 +42,8 @@ def circle(request):
             compareurl = "\x0302null\x0a3"
     else:
         compareurl = data['compare']
+        logprint(f"Setting to data field compare: {data['compare']}")
+        logprint(f"Full dump: {data}")
     message1 = f"""
                 [\x0315CircleCI\x03] \x0306 {data['reponame'] or ''}/{data['reponame'] or ''}
                  \x03#{data['build_num'] or ''} (\x0306{data['branch'] or ''}\x03 -  
@@ -49,7 +51,7 @@ def circle(request):
                  \x03: {data['outcome'] or ''}
                 """
     message2 = f"""
-                [\x0315CircleCI\x03] Change view: \x02\x0311{compareurl}
+                [\x0315CircleCI\x03] Change view: \x02\x0311{compareurl or data['compare']}
                 \x02\x03 Build details: \x02\x0311 {data['build_url'] or ''}\x02\x03    
                 """
 

@@ -128,8 +128,7 @@ def github(prequest):
     elif event == 'pull_request_review':
         logprint("pull request review event:")
         gitrecord = githubmodels.GitHubMessage(action=request['action'] or None, timestamp=timestamp,
-                                               number=None,
-                                               issue=None, comment=None,
+                                               number=None, issue=None, comment=None,
                                                repository=request['repository'] or None, organization='NA',
                                                sender=request['sender'], pull_request=request['pull_request'] or None,
                                                changes=None)

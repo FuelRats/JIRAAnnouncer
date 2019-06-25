@@ -1,5 +1,3 @@
-import random
-import time
 import simplejson
 import hmac
 import time

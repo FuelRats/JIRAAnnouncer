@@ -23,6 +23,7 @@ def github(prequest):
     data = prequest.body
     message = ""
     domessage = True
+    gitrecord = None
 
     if 'X-GitHub-Event' not in prequest.headers:
         logprint("Malformed request to GitHub webhook handler (Missing X-Github-Event)")
@@ -169,7 +170,8 @@ def github(prequest):
             lastrecord = prequest.dbsession.query(githubmodels.GitHubMessage).order_by(
                 githubmodels.GitHubMessage.id.desc()).first()
             logprint(f"lastrecord: {lastrecord.pull_request['number']} current: {request['pull_request']['number']}")
-            if lastrecord.pull_request['number'] == request['pull_request']['number'] and lastrecord.sender['login'] == request['sender']['login']:
+            if lastrecord.pull_request['number'] == request['pull_request']['number'] and \
+                    lastrecord.sender['login'] == request['sender']['login']:
                 logprint("Suppressing comment on same as last GitHub message.")
                 return
             else:

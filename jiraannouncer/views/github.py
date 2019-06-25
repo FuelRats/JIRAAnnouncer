@@ -220,7 +220,8 @@ def github(prequest):
             filter(githubmodels.GitHubMessage.timestamp < timeout)
         if oldrecords.count() > 0:
             logprint(f"Deleted {oldrecords.count()} old GitHub messages.")
-            prequest.dbsession.delete(oldrecords)
+            prequest.dbsession.query(githubmodels.GitHubMessage).\
+                filter(githubmodels.GitHubMessage.timestamp < timeout).delete()
     if lastmessage['full'] == message:
         logprint("Duplicate message, skipping:")
         logprint(message)

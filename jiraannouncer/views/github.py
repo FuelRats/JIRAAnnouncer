@@ -79,15 +79,23 @@ def github(prequest):
                                                sender=request['sender'], pull_request=None,
                                                changes=None)
     elif event == 'issue_comment':
-        message = (f"\x0314{request['sender']['login']}\x03 {request['action']} comment on issue #"
-                   f"{request['issue']['number']}: \"{demarkdown(request['comment']['body'])}\" in \x0306"
-                   f"{request['repository']['name']}\x03. \x02\x0311{request['comment']['html_url']}\x02\x03")
+        lastrecord = prequest.dbsession.query(githubmodels.GitHubMessage).order_by(
+            githubmodels.GitHubMessage.id.desc()).first()
+        logprint(f"lastrecord: {lastrecord['pull_request']['number']} current: {request['pull_request']['number']}")
+        if lastrecord['pull_request']['number'] == request['pull_request']['number']:
+            logprint("Suppressing comment on same as last GitHub message.")
+            return
+        else:
+            message = (f"\x0314{request['sender']['login']}\x03 {request['action']} comment on issue #"
+                       f"{request['issue']['number']}: \"{demarkdown(request['comment']['body'])}\" in \x0306"
+                       f"{request['repository']['name']}\x03. \x02\x0311{request['comment']['html_url']}\x02\x03")
         gitrecord = githubmodels.GitHubMessage(action=request['action'] or None,
                                                number=request['issue']['number'] or None,
                                                issue=request['issue'] or None, comment=request['comment'] or None,
                                                repository=request['repository'] or None, organization='NA',
                                                sender=request['sender'], pull_request=None,
                                                changes=None)
+
     elif event == 'pull_request':
         gitrecord = githubmodels.GitHubMessage(action=request['action'] or None,
                                                number=request['issue']['number'] or None,

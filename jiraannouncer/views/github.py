@@ -62,7 +62,7 @@ def github(prequest):
         devsay("A GitHub payload failed to decode to JSON!")
         return
     domessage = True
-    gitrecord = githubmodels.GitHubMessage(action=request['action'], number=request['issue']['number'] or None,
+    gitrecord = githubmodels.GitHubMessage(action=request['action'] or None, number=request['issue']['number'] or None,
                                            issue=request['issue'] or None, comment=request['comment'] or None,
                                            repository=request['repository'] or None, organization='NA',
                                            sender=request['sender'], pull_request=request['pull_request'] or None,

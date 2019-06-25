@@ -81,7 +81,7 @@ def github(prequest):
     elif event == 'issue_comment':
         lastrecord = prequest.dbsession.query(githubmodels.GitHubMessage).order_by(
             githubmodels.GitHubMessage.id.desc()).first()
-        logprint(f"lastrecord: {lastrecord['pull_request']['number']} current: {request['pull_request']['number']}")
+        logprint(f"lastrecord: {lastrecord.pull_request['number']} current: {request['pull_request']['number']}")
         if lastrecord['pull_request']['number'] == request['pull_request']['number']:
             logprint("Suppressing comment on same as last GitHub message.")
             return

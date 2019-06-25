@@ -230,6 +230,11 @@ def github(prequest):
     msgshort = {"time": time.time(), "type": event, "key": "GitHub", "full": message}
     if gitrecord is not None:
         prequest.dbsession.add(gitrecord)
+        timeout = time.time() - 3600
+        x = request.session.query(githubmodels.GitHubMessage).filter_by(timestamp < timeout).all()
+        if x.count() > 0:
+            logprint(f"Deleted {x.count} old GitHub messages.")
+            request.session.delete(x)
     if lastmessage['full'] == message:
         logprint("Duplicate message, skipping:")
         logprint(message)

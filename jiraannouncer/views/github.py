@@ -62,12 +62,7 @@ def github(prequest):
         devsay("A GitHub payload failed to decode to JSON!")
         return
     domessage = True
-    gitrecord = githubmodels.GitHubMessage(action=request['action'] or None, number=request['issue']['number'] or None,
-                                           issue=request['issue'] or None, comment=request['comment'] or None,
-                                           repository=request['repository'] or None, organization='NA',
-                                           sender=request['sender'], pull_request=request['pull_request'] or None,
-                                           changes=request['changes'] or None)
-    prequest.dbsession.add(gitrecord)
+
     if 'repository' in request and request['repository']['name'] in ["pipsqueak3", "limpet", "MechaChainsaw"]:
         channels = ['#mechadev']
     else:
@@ -77,11 +72,29 @@ def github(prequest):
         message = (f"\x0314{request['sender']['login']}\x03 {request['action']} issue #{request['issue']['number']}"
                    f": \"{request['issue']['title']}\" in \x0306{request['repository']['name']}\x03. \x02\x0311"
                    f"{request['issue']['html_url']}\x02\x03")
+        gitrecord = githubmodels.GitHubMessage(action=request['action'] or None,
+                                               number=request['issue']['number'] or None,
+                                               issue=request['issue'] or None, comment=None,
+                                               repository=request['repository'] or None, organization='NA',
+                                               sender=request['sender'], pull_request=None,
+                                               changes=None)
     elif event == 'issue_comment':
         message = (f"\x0314{request['sender']['login']}\x03 {request['action']} comment on issue #"
                    f"{request['issue']['number']}: \"{demarkdown(request['comment']['body'])}\" in \x0306"
                    f"{request['repository']['name']}\x03. \x02\x0311{request['comment']['html_url']}\x02\x03")
+        gitrecord = githubmodels.GitHubMessage(action=request['action'] or None,
+                                               number=request['issue']['number'] or None,
+                                               issue=request['issue'] or None, comment=request['comment'] or None,
+                                               repository=request['repository'] or None, organization='NA',
+                                               sender=request['sender'], pull_request=None,
+                                               changes=None)
     elif event == 'pull_request':
+        gitrecord = githubmodels.GitHubMessage(action=request['action'] or None,
+                                               number=request['issue']['number'] or None,
+                                               issue=request['issue'] or None, comment=request['comment'] or None,
+                                               repository=request['repository'] or None, organization='NA',
+                                               sender=request['sender'], pull_request=request['pull_request'] or None,
+                                               changes=None)
         if 'id' in request['pull_request']['head']['repo'] and request['pull_request']['head'][
                 'repo']['id'] == request['repository']['id']:
             headref = request['pull_request']['head']['ref']
@@ -179,6 +192,7 @@ def github(prequest):
         devsay(f"An unhandled GitHub event was passed: {event}. Absolver should implement!")
         return
     msgshort = {"time": time.time(), "type": event, "key": "GitHub", "full": message}
+    prequest.dbsession.add(gitrecord)
     if lastmessage['full'] == message:
         logprint("Duplicate message, skipping:")
         logprint(message)

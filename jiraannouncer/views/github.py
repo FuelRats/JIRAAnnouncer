@@ -88,7 +88,7 @@ def github(prequest):
             if lastrecord.issue['number'] == request['issue']['number'] and lastrecord.sender['login'] == \
                     request['sender']['login']:
                 logprint("Suppressing comment by same user on same GitHub issue.")
-            return
+                return
         else:
             message = (f"\x0314{request['sender']['login']}\x03 {request['action']} comment on issue #"
                        f"{request['issue']['number']}: \"{demarkdown(request['comment']['body'])}\" in \x0306"

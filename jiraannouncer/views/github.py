@@ -192,7 +192,7 @@ def github(prequest):
                        f"{request['repository']['name']}/{request['ref'].split('/')[-1]}\x03. \x02\x0311"
                        f"{request['compare']}\x02\x03")
         gitrecord = githubmodels.GitHubMessage(action=None,
-                                               number=request['issue']['number'] or None,
+                                               number= None,
                                                issue=None, comment=None,
                                                repository=request['repository'] or None, organization='NA',
                                                sender=request['sender'], pull_request=None,
@@ -202,7 +202,7 @@ def github(prequest):
                    f"\" to \x0306{request['repository']['name']}\x03. "
                    f"\x02\x0311{request['comment']['html_url']}\x02\x03")
         gitrecord = githubmodels.GitHubMessage(action=None,
-                                               number=request['issue']['number'] or None,
+                                               number=None,
                                                issue=None, comment=request['comment'] or None,
                                                repository=request['repository'] or None, organization='NA',
                                                sender=request['sender'], pull_request=None,

@@ -189,7 +189,7 @@ def github(prequest):
             message = (f"\x0314{request['sender']['login']}\x03 pushed {str(len(request['commits']))} commits to \x0306" 
                        f"{request['repository']['name']}/{request['ref'].split('/')[-1]}\x03. \x02\x0311"
                        f"{request['compare']}\x02\x03")
-        gitrecord = githubmodels.GitHubMessage(action=request['action'] or None,
+        gitrecord = githubmodels.GitHubMessage(action=None,
                                                number=request['issue']['number'] or None,
                                                issue=request['issue'] or None, comment=None,
                                                repository=request['repository'] or None, organization='NA',
@@ -199,7 +199,7 @@ def github(prequest):
         message = (f"\x0314{request['sender']['login']}\x03 commented on commit \"{request['comment']['commit_id'][:7]}"
                    f"\" to \x0306{request['repository']['name']}\x03. "
                    f"\x02\x0311{request['comment']['html_url']}\x02\x03")
-        gitrecord = githubmodels.GitHubMessage(action=request['action'] or None,
+        gitrecord = githubmodels.GitHubMessage(action=None,
                                                number=request['issue']['number'] or None,
                                                issue=request['issue'] or None, comment=request['comment'] or None,
                                                repository=request['repository'] or None, organization='NA',

@@ -191,7 +191,7 @@ def github(prequest):
                        f"{request['compare']}\x02\x03")
         gitrecord = githubmodels.GitHubMessage(action=None,
                                                number=request['issue']['number'] or None,
-                                               issue=request['issue'] or None, comment=None,
+                                               issue=None, comment=None,
                                                repository=request['repository'] or None, organization='NA',
                                                sender=request['sender'], pull_request=None,
                                                changes=request['commits'])
@@ -201,7 +201,7 @@ def github(prequest):
                    f"\x02\x0311{request['comment']['html_url']}\x02\x03")
         gitrecord = githubmodels.GitHubMessage(action=None,
                                                number=request['issue']['number'] or None,
-                                               issue=request['issue'] or None, comment=request['comment'] or None,
+                                               issue=None, comment=request['comment'] or None,
                                                repository=request['repository'] or None, organization='NA',
                                                sender=request['sender'], pull_request=None,
                                                changes=None)

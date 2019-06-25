@@ -218,9 +218,9 @@ def github(prequest):
         prequest.dbsession.add(gitrecord)
         timeout = time.time() - 3600
         oldrecords = prequest.dbsession.query(githubmodels.GitHubMessage).\
-            filter(githubmodels.GitHubMessage.timestamp < timeout).all()
+            filter(githubmodels.GitHubMessage.timestamp < timeout)
         if oldrecords.count() > 0:
-            logprint(f"Deleted {oldrecords.count} old GitHub messages.")
+            logprint(f"Deleted {oldrecords.count()} old GitHub messages.")
             prequest.dbsession.delete(oldrecords)
     if lastmessage['full'] == message:
         logprint("Duplicate message, skipping:")

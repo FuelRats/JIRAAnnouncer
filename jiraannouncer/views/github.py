@@ -15,23 +15,23 @@ OFFSET = 5
 
 
 @view_config(route_name='github', renderer="json")
-def github(request):
+def github(prequest):
     """Handle GitHub events."""
-    settings = request.registry.settings
+    settings = prequest.registry.settings
     github_secret = settings['github_secret'] if 'github_secret' in settings else None
     lastmessage = getlast()
-    data = request.body
+    data = prequest.body
     message = ""
     domessage = True
 
-    if 'X-GitHub-Event' not in request.headers:
+    if 'X-GitHub-Event' not in prequest.headers:
         logprint("Malformed request to GitHub webhook handler (Missing X-Github-Event)")
         devsay(
              "[\x0315GitHub\x03] Malformed request to GitHub webhook handler (Missing X-GitHub-Event header)")
         return
 
     if github_secret is not None:
-        header_signature = request.headers['X-Hub-Signature']
+        header_signature = prequest.headers['X-Hub-Signature']
         if header_signature is None:
             logprint("No signature sent in GitHub event, aborting.")
             return
@@ -40,7 +40,7 @@ def github(request):
             logprint("Signature not in SHA1 format, aborting.")
             return
 
-        mac = hmac.new(bytes(github_secret, 'utf8'), msg=request.body, digestmod='sha1')
+        mac = hmac.new(bytes(github_secret, 'utf8'), msg=prequest.body, digestmod='sha1')
 
         if hexversion >= 0x020707F0:
             if not hmac.compare_digest(str(mac.hexdigest()), str(signature)):
@@ -53,7 +53,7 @@ def github(request):
                 devsay(f"Invalid MAC in GitHub message: {str(signature)}")
                 return
 
-    event = request.headers['X-GitHub-Event']
+    event = prequest.headers['X-GitHub-Event']
     try:
         request = simplejson.loads(data)
     except simplejson.errors.JSONDecodeError:
@@ -62,12 +62,12 @@ def github(request):
         devsay("A GitHub payload failed to decode to JSON!")
         return
     domessage = True
-    gitrecord = githubmodels.GitHubMessage(action=request['action'], number=request['issue']['number'],
-                                           issue=request['issue'], comment=request['comment'],
-                                           repository=request['repository']['name'], organization='NA',
-                                           sender=request['sender'], pull_request=request['pull_request'],
-                                           changes=request['changes'])
-    request.dbsession.add(gitrecord)
+    gitrecord = githubmodels.GitHubMessage(action=request['action'], number=request['issue']['number'] or None,
+                                           issue=request['issue'] or None, comment=request['comment'] or None,
+                                           repository=request['repository'] or None, organization='NA',
+                                           sender=request['sender'], pull_request=request['pull_request'] or None,
+                                           changes=request['changes'] or None)
+    prequest.dbsession.add(gitrecord)
     if 'repository' in request and request['repository']['name'] in ["pipsqueak3", "limpet", "MechaChainsaw"]:
         channels = ['#mechadev']
     else:
@@ -136,7 +136,7 @@ def github(request):
             else:
                 logprint("Hound comment suppressed")
         else:
-            lastrecord = request.dbsession.query(githubmodels.GitHubMessage).order_by(
+            lastrecord = prequest.dbsession.query(githubmodels.GitHubMessage).order_by(
                 githubmodels.GitHubMessage.id.desc()).first()
             if lastrecord['pull_request']['number'] == request['pull_request']['number']:
                 logprint("Suppressing comment on same as last GitHub message.")

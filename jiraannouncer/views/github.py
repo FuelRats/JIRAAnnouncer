@@ -12,9 +12,6 @@ from ..utils import logprint, jsondump, send, getlast, demarkdown, devsay
 from ..models import githubmodels
 
 
-OFFSET = 5
-
-
 @view_config(route_name='github', renderer="json")
 def github(prequest):
     """Handle GitHub events."""

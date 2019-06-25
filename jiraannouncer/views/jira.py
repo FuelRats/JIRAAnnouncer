@@ -154,6 +154,9 @@ def jira(request):
         message = (f"Project deleted: \x02\x0307{data['project']['name']}\x02\x03 [\x02x0308"
                    f"{data['project']['key']}\x03\x02] under \x02\x0314{data['project']['projectLead']['key']}"
                    f" ({data['project']['projectLead']['displayName']})")
+    elif request_type == 'comment_created':
+        message = None  # Not sure we actually want spam every time a comment is made.
+        domessage = False
     else:
         message = "JIRA unhandled event: " + request_type
         devsay(f"An unhandled JIRA event '{request_type}' was passed to webhook. Absolver should implement.")

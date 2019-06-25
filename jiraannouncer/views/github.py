@@ -8,7 +8,8 @@ from sys import hexversion
 from pyramid.view import view_config
 
 from ..utils import logprint, jsondump, send, getlast, demarkdown, devsay
-from ..models import githubmodels
+from ..models import githubmodels, get_engine
+
 
 OFFSET = 5
 
@@ -61,6 +62,12 @@ def github(request):
         devsay("A GitHub payload failed to decode to JSON!")
         return
     domessage = True
+    gitrecord = githubmodels.GitHubMessage(action=request['action'], number=request['issue']['number'],
+                                           issue=request['issue'], comment=request['comment'],
+                                           repository=request['repository']['name'], organization='NA',
+                                           sender=request['sender'], pull_request=request['pull_request'],
+                                           changes=request['changes'])
+    request.dbsession.add(gitrecord)
     if 'repository' in request and request['repository']['name'] in ["pipsqueak3", "limpet", "MechaChainsaw"]:
         channels = ['#mechadev']
     else:
@@ -129,10 +136,16 @@ def github(request):
             else:
                 logprint("Hound comment suppressed")
         else:
-            message = (f"\x0314{request['sender']['login']}\x03 {request['action']} comment on pull request #" 
-                       f"{str(request['pull_request']['number'])}: \"{demarkdown(request['comment']['body'])}\" "
-                       f"in \x0306{request['repository']['name']}\x03. \x02\x0311{request['comment']['html_url']}"
-                       f"\x02\x03")
+            lastrecord = request.dbsession.query(githubmodels.GitHubMessage).order_by(
+                githubmodels.GitHubMessage.id.desc()).first()
+            if lastrecord['pull_request']['number'] == request['pull_request']['number']:
+                logprint("Suppressing comment on same as last GitHub message.")
+                return
+            else:
+                message = (f"\x0314{request['sender']['login']}\x03 {request['action']} comment on pull request #" 
+                           f"{str(request['pull_request']['number'])}: \"{demarkdown(request['comment']['body'])}\" "
+                           f"in \x0306{request['repository']['name']}\x03. \x02\x0311{request['comment']['html_url']}"
+                           f"\x02\x03")
     elif event == 'push':
         if not request['commits']:
             domessage = False

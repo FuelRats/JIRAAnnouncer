@@ -192,7 +192,7 @@ def github(prequest):
                        f"{request['repository']['name']}/{request['ref'].split('/')[-1]}\x03. \x02\x0311"
                        f"{request['compare']}\x02\x03")
         gitrecord = githubmodels.GitHubMessage(action=None,
-                                               number= None,
+                                               number=None,
                                                issue=None, comment=None,
                                                repository=request['repository'] or None, organization='NA',
                                                sender=request['sender'], pull_request=None,

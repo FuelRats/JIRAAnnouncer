@@ -201,7 +201,7 @@ def github(prequest):
         devsay(f"An unhandled GitHub event was passed: {event}. Absolver should implement!")
         return
     msgshort = {"time": time.time(), "type": event, "key": "GitHub", "full": message}
-    if gitrecord:
+    if gitrecord is not None:
         prequest.dbsession.add(gitrecord)
     if lastmessage['full'] == message:
         logprint("Duplicate message, skipping:")

@@ -22,7 +22,7 @@ def github(prequest):
     message = ""
     domessage = True
     gitrecord = None
-    timestamp = time.time()
+    timestamp = int(time.time())
 
     if 'X-GitHub-Event' not in prequest.headers:
         logprint("Malformed request to GitHub webhook handler (Missing X-Github-Event)")

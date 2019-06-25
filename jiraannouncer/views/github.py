@@ -84,7 +84,7 @@ def github(prequest):
         logprint(lastrecord)
         if lastrecord.issue is not None:
             logprint(f"lastrecord: {lastrecord.issue['number']} current: {request['issue']['number']}")
-        if lastrecord['pull_request']['number'] == request['pull_request']['number']:
+        if lastrecord.issue['number'] == request['issue']['number']:
             logprint("Suppressing comment on same as last GitHub message.")
             return
         else:

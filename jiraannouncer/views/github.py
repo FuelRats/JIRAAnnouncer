@@ -2,6 +2,7 @@ import random
 import time
 import simplejson
 import hmac
+import time
 
 from sys import hexversion
 
@@ -24,6 +25,7 @@ def github(prequest):
     message = ""
     domessage = True
     gitrecord = None
+    timestamp = time.time()
 
     if 'X-GitHub-Event' not in prequest.headers:
         logprint("Malformed request to GitHub webhook handler (Missing X-Github-Event)")
@@ -73,7 +75,7 @@ def github(prequest):
         message = (f"\x0314{request['sender']['login']}\x03 {request['action']} issue #{request['issue']['number']}"
                    f": \"{request['issue']['title']}\" in \x0306{request['repository']['name']}\x03. \x02\x0311"
                    f"{request['issue']['html_url']}\x02\x03")
-        gitrecord = githubmodels.GitHubMessage(action=request['action'] or None,
+        gitrecord = githubmodels.GitHubMessage(action=request['action'] or None, timestamp=timestamp,
                                                number=request['issue']['number'] or None,
                                                issue=request['issue'] or None, comment=None,
                                                repository=request['repository'] or None, organization='NA',
@@ -87,13 +89,13 @@ def github(prequest):
             logprint(f"lastrecord: {lastrecord.issue['number']} current: {request['issue']['number']}")
             if lastrecord.issue['number'] == request['issue']['number'] and lastrecord.sender['login'] == \
                     request['sender']['login']:
-                logprint("Suppressing comment by same user on same GitHub issue.")
-                return
-        else:
-            message = (f"\x0314{request['sender']['login']}\x03 {request['action']} comment on issue #"
-                       f"{request['issue']['number']}: \"{demarkdown(request['comment']['body'])}\" in \x0306"
-                       f"{request['repository']['name']}\x03. \x02\x0311{request['comment']['html_url']}\x02\x03")
-        gitrecord = githubmodels.GitHubMessage(action=request['action'] or None,
+                if (time.time() - lastrecord.timestamp) < 300:
+                    logprint("Suppressing comment by same user on same GitHub issue within 300s.")
+                    return
+        message = (f"\x0314{request['sender']['login']}\x03 {request['action']} comment on issue #"
+                   f"{request['issue']['number']}: \"{demarkdown(request['comment']['body'])}\" in \x0306"
+                   f"{request['repository']['name']}\x03. \x02\x0311{request['comment']['html_url']}\x02\x03")
+        gitrecord = githubmodels.GitHubMessage(action=request['action'] or None, timestamp=timestamp,
                                                number=request['issue']['number'] or None,
                                                issue=request['issue'] or None, comment=request['comment'] or None,
                                                repository=request['repository'] or None, organization='NA',
@@ -101,7 +103,7 @@ def github(prequest):
                                                changes=None)
 
     elif event == 'pull_request':
-        gitrecord = githubmodels.GitHubMessage(action=request['action'] or None,
+        gitrecord = githubmodels.GitHubMessage(action=request['action'] or None, timestamp=timestamp,
                                                number=request['issue']['number'] or None,
                                                issue=request['issue'] or None, comment=request['comment'] or None,
                                                repository=request['repository'] or None, organization='NA',
@@ -173,13 +175,13 @@ def github(prequest):
                 logprint(f"lastrecord: {lastrecord.pull_request['number']} current: {request['pull_request']['number']}")
                 if lastrecord.pull_request['number'] == request['pull_request']['number'] and \
                         lastrecord.sender['login'] == request['sender']['login']:
-                    logprint("Suppressing comment on same as last GitHub message.")
-                return
-            else:
-                message = (f"\x0314{request['sender']['login']}\x03 {request['action']} comment on pull request #" 
-                           f"{str(request['pull_request']['number'])}: \"{demarkdown(request['comment']['body'])}\" "
-                           f"in \x0306{request['repository']['name']}\x03. \x02\x0311{request['comment']['html_url']}"
-                           f"\x02\x03")
+                    if (time.time() - lastrecord.timestamp) < 300:
+                        logprint("Suppressing comment on same as last GitHub message.")
+                        return
+            message = (f"\x0314{request['sender']['login']}\x03 {request['action']} comment on pull request #" 
+                       f"{str(request['pull_request']['number'])}: \"{demarkdown(request['comment']['body'])}\" "
+                       f"in \x0306{request['repository']['name']}\x03. \x02\x0311{request['comment']['html_url']}"
+                       f"\x02\x03")
     elif event == 'push':
         if not request['commits']:
             domessage = False
@@ -192,7 +194,7 @@ def github(prequest):
             message = (f"\x0314{request['sender']['login']}\x03 pushed {str(len(request['commits']))} commits to \x0306" 
                        f"{request['repository']['name']}/{request['ref'].split('/')[-1]}\x03. \x02\x0311"
                        f"{request['compare']}\x02\x03")
-        gitrecord = githubmodels.GitHubMessage(action=None,
+        gitrecord = githubmodels.GitHubMessage(action=None, timestamp=timestamp,
                                                number=None,
                                                issue=None, comment=None,
                                                repository=request['repository'] or None, organization='NA',
@@ -202,7 +204,7 @@ def github(prequest):
         message = (f"\x0314{request['sender']['login']}\x03 commented on commit \"{request['comment']['commit_id'][:7]}"
                    f"\" to \x0306{request['repository']['name']}\x03. "
                    f"\x02\x0311{request['comment']['html_url']}\x02\x03")
-        gitrecord = githubmodels.GitHubMessage(action=None,
+        gitrecord = githubmodels.GitHubMessage(action=None, timestamp=timestamp,
                                                number=None,
                                                issue=None, comment=request['comment'] or None,
                                                repository=request['repository'] or None, organization='NA',

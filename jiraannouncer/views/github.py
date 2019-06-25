@@ -157,17 +157,6 @@ def github(prequest):
         if request['comment']['user']['login'] == "houndci-bot":
             message = (f"Style errors found on pull request #{str(request['pull_request']['number'])}: \""
                        f"{request['pull_request']['title']}\" in \x0306{request['repository']['name']}")
-            domessage = False
-            this_kennel = str(random.random())
-            kfile = open("kennel.p", "w")
-            kfile.write(this_kennel)
-            kfile.close()
-            time.sleep(2)
-            kfile2 = open("kennel.p", "r")
-            if kfile2.readline() == this_kennel:
-                domessage = True
-            else:
-                logprint("Hound comment suppressed")
         else:
             lastrecord = prequest.dbsession.query(githubmodels.GitHubMessage).order_by(
                 githubmodels.GitHubMessage.id.desc()).first()

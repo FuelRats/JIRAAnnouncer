@@ -8,7 +8,7 @@ from sys import hexversion
 from pyramid.view import view_config
 
 from ..utils import logprint, jsondump, send, getlast, demarkdown, devsay
-from ..models import githubmodels, get_engine
+from ..models import githubmodels
 
 
 OFFSET = 5

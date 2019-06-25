@@ -27,6 +27,7 @@ def jsondump(string):
 
 def demarkdown(string):
     """Remove markdown features from and limit length of messages"""
+    logprint(f"Demarkdown of string: {string}")
     string = re.sub('>.*(\n|$)', '', string).replace('`', '').replace('#', '')
     string = re.sub('\n.*', '', string)
     return string[:300] + ('...' if len(string) > 300 else '')

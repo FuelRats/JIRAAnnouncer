@@ -85,9 +85,9 @@ def github(prequest):
         logprint(lastrecord)
         if lastrecord.issue is not None:
             logprint(f"lastrecord: {lastrecord.issue['number']} current: {request['issue']['number']}")
-        if lastrecord.issue['number'] == request['issue']['number'] and lastrecord.sender['login'] == \
-                request['sender']['login']:
-            logprint("Suppressing comment by same user on same GitHub issue.")
+            if lastrecord.issue['number'] == request['issue']['number'] and lastrecord.sender['login'] == \
+                    request['sender']['login']:
+                logprint("Suppressing comment by same user on same GitHub issue.")
             return
         else:
             message = (f"\x0314{request['sender']['login']}\x03 {request['action']} comment on issue #"
@@ -169,10 +169,11 @@ def github(prequest):
         else:
             lastrecord = prequest.dbsession.query(githubmodels.GitHubMessage).order_by(
                 githubmodels.GitHubMessage.id.desc()).first()
-            logprint(f"lastrecord: {lastrecord.pull_request['number']} current: {request['pull_request']['number']}")
-            if lastrecord.pull_request['number'] == request['pull_request']['number'] and \
-                    lastrecord.sender['login'] == request['sender']['login']:
-                logprint("Suppressing comment on same as last GitHub message.")
+            if lastrecord.pull_request is not None:
+                logprint(f"lastrecord: {lastrecord.pull_request['number']} current: {request['pull_request']['number']}")
+                if lastrecord.pull_request['number'] == request['pull_request']['number'] and \
+                        lastrecord.sender['login'] == request['sender']['login']:
+                    logprint("Suppressing comment on same as last GitHub message.")
                 return
             else:
                 message = (f"\x0314{request['sender']['login']}\x03 {request['action']} comment on pull request #" 

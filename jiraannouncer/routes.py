@@ -8,3 +8,4 @@ def includeme(config):
     config.add_route('client', '/client')
     config.add_route('statuspage', '/statuspage')
     config.add_route('updater', '/updater')
+    config.add_route('upsource', '/upsource')

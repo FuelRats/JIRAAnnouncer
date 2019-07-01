@@ -13,7 +13,7 @@ notifyTypes = {
 buildresults = {
     'running': '\x0308Running\x03',
     'failure': '\x02\x0304Failure\x03\x02',
-    'successful': '\x0303Successful\x03'
+    'success': '\x0303Success\x03'
 }
 
 

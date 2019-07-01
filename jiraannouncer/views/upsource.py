@@ -10,6 +10,7 @@ from ..utils import logprint, jsondump, send, getlast, demarkdown, devsay
 def upsource(request):
     """Handle UpSource webhooks."""
     message = ''
+    logprint(f"Raw UpSource data: {request.body}")
     try:
         jsonbody = simplejson.loads(request.body)
     except simplejson.JSONDecodeError:

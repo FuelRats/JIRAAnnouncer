@@ -37,5 +37,5 @@ def teamcity(request):
     message = f"\x0315[\x0306TeamCity\x0315]\x03 {build['projectName']} - " \
         f"{notifyTypes[notifytype]}: Build #\x0315{build['buildId']}\x03 " \
         f"{buildresults[build['buildResult']]} (\x0315{build['buildStatusUrl']}\x03)"
-    send("#announcerdev", message, '')
+    send("#rattech", message, '')
     return

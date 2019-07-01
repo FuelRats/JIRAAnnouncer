@@ -6,8 +6,8 @@ from pyramid.view import view_config
 from ..utils import logprint, jsondump, send, getlast, demarkdown, devsay
 
 notifyTypes = {
-    'buildStarted': '\x0307Build Started\x03',
-    'buildInterrupted': '\x0315\x02Build Interrupted\x03\x02',
+    'buildStarted': '\x0302Build Started\x03',
+    'buildInterrupted': '\x0307\x02Build Interrupted\x03\x02',
     'buildFinished': '\x0303Build Finished\x03'
 }
 buildresults = {
@@ -34,7 +34,8 @@ def teamcity(request):
         logprint("No buildinfo in TeamCity call!")
     notifytype = build['notifyType']
 
-    message = f"\x0315[TeamCity]\x03 {build['projectName']} - {notifyTypes[notifytype]}:" \
-        f" {build['text']} ({build['buildStatusUrl']})"
+    message = f"\x0315[\x0306TeamCity\x0315]\x03 {build['projectName']} - " \
+        f"{notifyTypes[notifytype]}: Build #\x0315{build['buildId']}\x03 " \
+        f"{buildresults[build['buildResult']]} (\x0315{build['buildStatusUrl']}\x03)"
     send("#announcerdev", message, '')
     return

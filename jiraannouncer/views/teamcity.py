@@ -6,7 +6,7 @@ from pyramid.view import view_config
 from ..utils import logprint, jsondump, send, getlast, demarkdown, devsay
 
 notifyTypes = {
-    'buildStarted': '\x0302Build Started\x03',
+    'buildStarted': '\x0311Build Started\x03',
     'buildInterrupted': '\x0307\x02Build Interrupted\x03\x02',
     'buildFinished': '\x0303Build Finished\x03'
 }
@@ -35,7 +35,14 @@ def teamcity(request):
     notifytype = build['notifyType']
 
     message = f"\x0315[\x0306TeamCity\x0315]\x03 {build['projectName']} - " \
-        f"{notifyTypes[notifytype]}: Build #\x0315{build['buildId']}\x03 " \
+        f"{notifyTypes[notifytype]} on {build['agentName']}: Build #\x0315{build['buildId']}\x03 " \
         f"{buildresults[build['buildResult']]} (\x0315{build['buildStatusUrl']}\x03)"
     send("#rattech", message, '')
+    if build['buildResultDelta'] == 'fixed':
+        message = f"\0315[\x0306TeamCity\x0315]\x03 Yay! {build['projectName']} builds fixed!"
+        send("#rattech", message, '')
+    elif build['buildResultDelta'] == 'broken':
+        message = f"\x0315[\x0306TeamCity\x0315]\x03 Alert! Builds for {build['projectName']}" \
+            f" have started failing!"
+        send("#rattech", message, '')
     return

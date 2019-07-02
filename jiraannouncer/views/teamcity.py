@@ -21,7 +21,7 @@ buildresults = {
 def teamcity(request):
     """Handle TeamCity CI webhooks."""
     if 'channel' in request.GET.keys():
-        channel = request.GET.getone('channel')
+        channel = f"#{request.GET.getone('channel')}"
         logprint(f"Targeting channel #{channel}")
     else:
         channel = "#rattech"

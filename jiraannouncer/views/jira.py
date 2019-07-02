@@ -55,7 +55,7 @@ def jira(request):
                        f"\x03 Created: \x02{fields['summary']}"
                        f"\x02 in {fields['project']['name']}"
                        f" by \x02\x0314{fields['reporter']['displayName']}"
-                       f"\x02\x03. (\x02\x0311https://jira.fuelrats.com/browse/{issue_key}/\x03\x02)")
+                       f"\x02\x03. (\x02\x0311https://jira.fuelrats.com/browse/{issue_key}\x03\x02)")
         else:
             if 'priority' in fields:
                 message = (
@@ -63,14 +63,14 @@ def jira(request):
                     f"{issue_key}\x03\x02] Priority: {fields['priority']['name']} in \x02"
                     f"{fields['project']['name']}\x02(\x02{fields['project']['key']}\x02) by \x02\x0314"
                     f"{fields['reporter']['displayName']}.\x03\x02 \"{fields['summary']}"
-                    f"\". (\x02\x0311https://jira.fuelrats.com/browse/{issue_key}/\x03\x02)")
+                    f"\". (\x02\x0311https://jira.fuelrats.com/browse/{issue_key}\x03\x02)")
             else:
                 message = (
                     f"Issue Created: \x02\x0307{fields['issuetype']['name']}\x02\x03 [\x02\x0306"
                     f"{issue_key}\x03\x02] in \x02{fields['project']['name']}\x02(\x02"
                     f"{fields['project']['key']}\x02) by \x02\x0314{fields['reporter']['displayName']}"
                     f".\x03\x02 \"{fields['summary']}\". (\x02\x0311https://jira.fuelrats.com/browse/"
-                    f"{issue_key}/\x03\x02)")
+                    f"{issue_key}\x03\x02)")
     elif request_type == 'jira:issue_updated':
         if "OV-" in issue_key or "DRR-" in issue_key:
             if data['user']['displayName'] == "Fuel Rats Automation":
@@ -96,7 +96,7 @@ def jira(request):
                     f"\x0307{fields['issuetype']['name']}\x03 {status_colour}{fields['status']['name']}"
                     f"\x03: \x02{fields['summary']}\x02 in {fields['project']['name']} by \x02\x0314"
                     f"{data['user']['displayName']}\x02\x03. (\x02\x0311https://jira.fuelrats.com/browse/"
-                    f"{issue_key}/\x03\x02)")
+                    f"{issue_key}\x03\x02)")
         else:
             if 'changelog' in data:
                 if len(data['changelog']['items']) == 1:
@@ -131,7 +131,7 @@ def jira(request):
                 f"{fields['summary']}\" [\x02\x0306{data['issue']['key']}\x03\x02] in \x02"
                 f"{fields['project']['name']}\x02(\x02{fields['project']['key']}\x02) by \x0314\x02"
                 f"{user}.\x03\x02 Status: \x02{status_colour}{fields['status']['name']}\x03\x02. "
-                f"(\x0311\x02https://jira.fuelrats.com/browse/{issue_key}/\x03\x02)")
+                f"(\x0311\x02https://jira.fuelrats.com/browse/{issue_key}\x03\x02)")
     elif request_type == 'jira:issue_deleted':
         message = (
             f"Issue Deleted: \x02\x0307{fields['issuetype']['name']}\x02\x03 \"{fields['summary']}"

@@ -20,11 +20,15 @@ buildresults = {
 @view_config(route_name='teamcity', renderer='json')
 def teamcity(request):
     """Handle TeamCity CI webhooks."""
-    message = ''
+    if 'channel' in request.GET.keys():
+        channel = request.GET.getone('channel')
+        logprint(f"Targeting channel #{channel}")
+    else:
+        channel = "#rattech"
     logprint(f"TeamCity called!")
     try:
-        jsonbody = simplejson.loads(request.body)
-    except simplejson.JSONDecodeError:
+        jsonbody = request.json_body
+    except:
         logprint("Error loading TeamCity JSON data!")
         return
     if 'build' in jsonbody:
@@ -37,12 +41,12 @@ def teamcity(request):
     message = f"\x0315[\x0306TeamCity\x0315]\x03 {build['projectName']} - " \
         f"{notifyTypes[notifytype]} on {build['agentName']}: Build #\x0315{build['buildId']}\x03 " \
         f"{buildresults[build['buildResult']]} (\x0315{build['buildStatusUrl']}\x03)"
-    send("#rattech", message, '')
+    send(channel, message, '')
     if build['buildResultDelta'] == 'fixed':
         message = f"\0315[\x0306TeamCity\x0315]\x03 Yay! {build['projectName']} builds fixed!"
-        send("#rattech", message, '')
+        send(channel, message, '')
     elif build['buildResultDelta'] == 'broken':
         message = f"\x0315[\x0306TeamCity\x0315]\x03 Alert! Builds for {build['projectName']}" \
             f" have started failing!"
-        send("#rattech", message, '')
+        send(channel, message, '')
     return

@@ -1,9 +1,6 @@
-import simplejson
-import time
-
 from pyramid.view import view_config
 
-from ..utils import logprint, jsondump, send, getlast, demarkdown, devsay
+from ..utils import logprint, send
 
 notifyTypes = {
     'buildStarted': '\x0311Build Started\x03',
@@ -22,7 +19,7 @@ def teamcity(request):
     """Handle TeamCity CI webhooks."""
     if 'channel' in request.GET.keys():
         channel = f"#{request.GET.getone('channel')}"
-        logprint(f"Targeting channel #{channel}")
+        logprint(f"Targeting channel {channel}")
     else:
         channel = "#rattech"
     logprint(f"TeamCity called!")

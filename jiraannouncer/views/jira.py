@@ -14,8 +14,8 @@ def jira(request):
     """Handle JIRA events."""
     lastmessage = getlast()
     try:
-        data = simplejson.loads(request.body)
-    except simplejson.errors.JSONDecodeError:
+        data = request.json_body
+    except:
         logprint("Failed to decode JSON from body. Dump:")
         logprint(request.body)
         devsay("A JIRA payload couldn't be decoded. Absolver, check the logfile!")

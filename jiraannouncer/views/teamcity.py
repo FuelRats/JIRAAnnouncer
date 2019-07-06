@@ -34,7 +34,11 @@ def teamcity(request):
         build = {}
         logprint("No buildinfo in TeamCity call!")
     notifytype = build['notifyType']
-
+    if 'buildType' in build['extraParameters']:
+        if build['extraParameters']['buildType'] == 'deployment':
+            message = f"\x0315[\x0306TeamCity\x0315]\x03 {build['projectName']} - " \
+                        f"deploying from {build['agentName']}"
+            send(channel, message, '')
     message = f"\x0315[\x0306TeamCity\x0315]\x03 {build['projectName']} - " \
         f"{notifyTypes[notifytype]} on {build['agentName']}: Build #\x0315{build['buildId']}\x03 " \
         f"{buildresults[build['buildResult']]} (\x0315{build['buildStatusUrl']}\x03)"

@@ -67,7 +67,7 @@ def github(prequest):
         channels = ['#rattech']
 
     if event == 'issues':
-        message = (f"\x0314{request['sender']['login']}\x03 {request['action']} issue #{request['issue']['number']}"
+        message = (f"\x0314 {request['sender']['login']} \x03{request['action']} issue #{request['issue']['number']}"
                    f": \"{request['issue']['title']}\" in \x0306{request['repository']['name']}\x03. \x02\x0311"
                    f"{request['issue']['html_url']}\x02\x03")
         gitrecord = githubmodels.GitHubMessage(action=request['action'] or None, timestamp=timestamp,
@@ -87,7 +87,7 @@ def github(prequest):
                 if (time.time() - lastrecord.timestamp) < 300:
                     logprint("Suppressing comment by same user on same GitHub issue within 300s.")
                     return
-        message = (f"\x0314{request['sender']['login']}\x03 {request['action']} comment on issue #"
+        message = (f"\x0314 {request['sender']['login']} \x03{request['action']} comment on issue #"
                    f"{request['issue']['number']}: \"{demarkdown(request['comment']['body'])}\" in \x0306"
                    f"{request['repository']['name']}\x03. \x02\x0311{request['comment']['html_url']}\x02\x03")
         gitrecord = githubmodels.GitHubMessage(action=request['action'] or None, timestamp=timestamp,
@@ -110,14 +110,14 @@ def github(prequest):
         else:
             headref = request['pull_request']['head']['label']
         if request['action'] == 'review_requested':
-            message = (f"\x0314{request['sender']['login']}\x03 requested a review from \x0314"
+            message = (f"\x0314 {request['sender']['login']} \x03requested a review from\x0314 "
                        f"{', '.join(x['login'] for x in request['pull_request']['requested_reviewers'])}"
-                       f"\x03 of pull request #{str(request['number'])}: \"{demarkdown(request['pull_request']['title'])}\""
+                       f" \x03of pull request #{str(request['number'])}: \"{demarkdown(request['pull_request']['title'])}\""
                        f" from \x0306{headref}\x03 to \x0306 {request['pull_request']['base']['ref']}"
                        f"\x03 in \x0306{request['repository']['name']}\x03. \x02\x0311"
                        f"{request['pull_request']['html_url']}\x02\x03")
         else:
-            message = (f"\x0314{request['sender']['login']}\x03 "
+            message = (f"\x0314 {request['sender']['login']} \x03"
                        f"{'merged' if request['pull_request']['merged'] else request['action']}"
                        f" pull request #{str(request['number'])}: \"{demarkdown(request['pull_request']['title'])}"
                        f"\" from \x0306{headref}\x03 to \x0306{request['pull_request']['base']['ref']}"
@@ -141,8 +141,8 @@ def github(prequest):
             logprint(f"Review action: {request['action']}")
             action = request['action']
 
-        message = (f"\x0314{request['sender']['login']}\x03 {action}\x03 review of \x0314" 
-                   f"{request['pull_request']['user']['login']}\x03's pull request #"
+        message = (f"\x0314 {request['sender']['login']} \x03{action}\x03 review of\x0314" 
+                   f" {request['pull_request']['user']['login']} \x03's pull request #"
                    f"{str(request['pull_request']['number'])}: \"{demarkdown(request['review']['body'] or '')}\" "
                    f"in \x0306{request['repository']['name']}\x03. "
                    f"\x02\x0311{request['review']['html_url']}\x02\x03")
@@ -161,7 +161,7 @@ def github(prequest):
                     if (time.time() - lastrecord.timestamp) < 300:
                         logprint("Suppressing comment on same as last GitHub message.")
                         return
-            message = (f"\x0314{request['sender']['login']}\x03 {request['action']} comment on pull request #" 
+            message = (f"\x0314 {request['sender']['login']} \x03{request['action']} comment on pull request #" 
                        f"{str(request['pull_request']['number'])}: \"{demarkdown(request['comment']['body'])}\" "
                        f"in \x0306{request['repository']['name']}\x03. \x02\x0311{request['comment']['html_url']}"
                        f"\x02\x03")
@@ -170,11 +170,11 @@ def github(prequest):
             domessage = False
             message = "Empty commit event ignored"
         elif len(request['commits']) == 1:
-            message = (f"\x0314{request['sender']['login']}\x03 pushed {request['commits'][0]['id'][:7]}: \"" 
+            message = (f"\x0314 {request['sender']['login']} \x03pushed {request['commits'][0]['id'][:7]}: \"" 
                        f"{request['commits'][0]['message']}\" to \x0306{request['repository']['name']}/"
                        f"{request['ref'].split('/')[-1]}\x03. \x02\x0311{request['compare']}\x02\x03")
         else:
-            message = (f"\x0314{request['sender']['login']}\x03 pushed {str(len(request['commits']))} commits to \x0306" 
+            message = (f"\x0314 {request['sender']['login']} \x03pushed {str(len(request['commits']))} commits to \x0306" 
                        f"{request['repository']['name']}/{request['ref'].split('/')[-1]}\x03. \x02\x0311"
                        f"{request['compare']}\x02\x03")
         gitrecord = githubmodels.GitHubMessage(action=None, timestamp=timestamp,
@@ -184,7 +184,7 @@ def github(prequest):
                                                sender=request['sender'], pull_request=None,
                                                changes=request['commits'])
     elif event == 'commit_comment':
-        message = (f"\x0314{request['sender']['login']}\x03 commented on commit \"{request['comment']['commit_id'][:7]}"
+        message = (f"\x0314 {request['sender']['login']} \x03commented on commit \"{request['comment']['commit_id'][:7]}"
                    f"\" to \x0306{request['repository']['name']}\x03. "
                    f"\x02\x0311{request['comment']['html_url']}\x02\x03")
         gitrecord = githubmodels.GitHubMessage(action=None, timestamp=timestamp,
@@ -195,7 +195,7 @@ def github(prequest):
                                                changes=None)
     elif event == 'create':
         if request['ref_type'] in {'tag', 'branch'}:
-            message = (f"\x0314{request['sender']['login']}\x03 created {request['ref_type']} \"{request['ref']}\""
+            message = (f"\x0314 {request['sender']['login']} \x03created {request['ref_type']} \"{request['ref']}\""
                        f" in \x0306{request['repository']['name']} \x03.")
             gitrecord = None
         else:

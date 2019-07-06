@@ -9,6 +9,11 @@ from ..utils import logprint, send, demarkdown, devsay
 def upsource(request):
     """Handle UpSource webhooks."""
     message = ''
+    if 'channel' in request.GET.keys():
+        channel = f"#{request.GET.getone('channel')}"
+        logprint(f"Targeting channel {channel}")
+    else:
+        channel = "#announcerdev"
     logprint(f"Raw UpSource data: {request.body}")
     try:
         jsonbody = simplejson.loads(request.body)
@@ -29,4 +34,4 @@ def upsource(request):
         message = f"New revision: {data['revisionId']} by {data['author']}: \"{demarkdown(data['message'])}\""
     else:
         logprint(f"Unhandled UpSource event: {event}")
-    send('#announcerdev', message, '')
+    send(channel, message, '')

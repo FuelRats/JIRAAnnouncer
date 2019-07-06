@@ -112,14 +112,14 @@ def github(prequest):
         if request['action'] == 'review_requested':
             message = (f"\x0314{request['sender']['login']}\x03 requested a review from \x0314"
                        f"{','.join(x['login'] for x in request['pull_request']['requested_reviewers'])}"
-                       f"\x03 of pull request #{str(request['number'])}: \"{request['pull_request']['title']}\""
+                       f"\x03 of pull request #{str(request['number'])}: \"{demarkdown(request['pull_request']['title'])}\""
                        f" from \x0306{headref}\x03 to \x0306 {request['pull_request']['base']['ref']}"
                        f"\x03 in \x0306{request['repository']['name']}\x03. \x02\x0311"
                        f"{request['pull_request']['html_url']}\x02\x03")
         else:
             message = (f"\x0314{request['sender']['login']}\x03 "
                        f"{'merged' if request['pull_request']['merged'] else request['action']}"
-                       f" pull request #{str(request['number'])}: \"{request['pull_request']['title']}"
+                       f" pull request #{str(request['number'])}: \"{demarkdown(request['pull_request']['title'])}"
                        f"\" from \x0306{headref}\x03 to \x0306{request['pull_request']['base']['ref']}"
                        f"\x03 in \x0306{request['repository']['name']}\x03. \x02\x0311" 
                        f"{request['pull_request']['html_url']}\x02\x03")

@@ -1,9 +1,8 @@
 import simplejson
-import time
 
 from pyramid.view import view_config
 
-from ..utils import logprint, jsondump, send, getlast, demarkdown, devsay
+from ..utils import logprint, send, demarkdown, devsay
 
 
 @view_config(route_name='upsource', renderer='json')
@@ -25,9 +24,9 @@ def upsource(request):
         data = {}
     if event == 'ReviewCreatedFeedEventBean':
         message = f"New review in {data['projectId']} {data['majorVersion']+'.' or ''}" \
-            f"{data['minorVersion'] or ''} - {data['message']} ({data['author']}"
+            f"{data['minorVersion'] or ''} - {demarkdown(data['message'])} ({data['author']}"
     elif event == 'NewRevisionEventBean':
-        message = f"New revision: {data['revisionId']} by {data['author']}: \"{data['message']}\""
+        message = f"New revision: {data['revisionId']} by {data['author']}: \"{demarkdown(data['message'])}\""
     else:
         logprint(f"Unhandled UpSource event: {event}")
     send('#announcerdev', message, '')

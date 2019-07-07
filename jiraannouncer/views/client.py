@@ -14,7 +14,7 @@ def client(request):
     if referer != "https://clients.fuelrats.com:7778/":
         logprint(f"Client announcer called with invalid referer: {referer}")
         devsay(f"Someone tried to call the client announcer with an invalid referer '{referer}'! Absolver!")
-        return
+        possiblefake=True
     try:
         cmdrname = request.params['cmdrname']
         system = request.params['system']
@@ -31,4 +31,6 @@ def client(request):
         message = f"Incoming Client: {cmdrname} - System: {system} - Platform: {platform} - O2: {o2status} - {extradata}"
 
     send("#fuelrats", message, "No Short for you!")
+    if possiblefake:
+        send("#ratchat", f"[Client Announcer] Warning! The arriving case is not passing validation information!","")
     return

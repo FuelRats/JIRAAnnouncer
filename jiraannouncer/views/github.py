@@ -53,8 +53,8 @@ def github(prequest):
 
     event = prequest.headers['X-GitHub-Event']
     try:
-        request = simplejson.loads(data)
-    except simplejson.errors.JSONDecodeError:
+        request = prequest.json_body
+    except:
         logprint("Error loading GitHub payload:")
         logprint(data)
         devsay("A GitHub payload failed to decode to JSON!")

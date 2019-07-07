@@ -10,6 +10,7 @@ from ..utils import logprint, send, devsay
 def client(request):
     """Handle Client arrival announcements."""
     referer = request.headers['Referer'] if 'referer' in request.headers else None
+    possiblefake = False
 
     if referer != "https://clients.fuelrats.com:7778/":
         logprint(f"Client announcer called with invalid referer: {referer}")

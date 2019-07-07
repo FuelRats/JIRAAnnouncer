@@ -30,6 +30,7 @@ def demarkdown(string):
     logprint(f"Demarkdown of string: {string}")
     string = re.sub('>.*(\n|$)', '', string).replace('`', '').replace('#', '')
     string = re.sub('\n.*', '', string)
+    string = re.sub('&gt;', '>', string)
     return string[:300] + ('...' if len(string) > 300 else '')
 
 

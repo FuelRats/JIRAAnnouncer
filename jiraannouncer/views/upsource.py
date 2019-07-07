@@ -29,9 +29,10 @@ def upsource(request):
         data = {}
     if event == 'ReviewCreatedFeedEventBean':
         message = f"New review in {data['projectId']} {data['majorVersion']+'.' or ''}" \
-            f"{data['minorVersion'] or ''} - {demarkdown(data['message'])} ({data['author']}"
+            f"{data['minorVersion'] or ''} - {demarkdown(data['message'])} ({demarkdown(data['author'])}"
     elif event == 'NewRevisionEventBean':
-        message = f"New revision: {data['revisionId']} by {data['author']}: \"{demarkdown(data['message'])}\""
+        message = f"New revision: {data['revisionId']} by {demarkdown(data['author'])}:" \
+            f" \"{demarkdown(data['message'])}\""
     else:
         logprint(f"Unhandled UpSource event: {event}")
     send(channel, message, '')

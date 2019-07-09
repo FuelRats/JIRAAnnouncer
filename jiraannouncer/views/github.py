@@ -205,6 +205,9 @@ def github(prequest):
     elif event == 'status':
         logprint("Ignored github status event")
         return
+    elif event == 'release':
+        message = (f"\x0314New release\x03 \x0311{request['name']}\x03 from {request['repository']} by\x0314 "
+                   f"{request['sender']} \x03(\x02\x0311{request['url']}\x03)")
     else:
         logprint(f"GitHub unhandled event: {event}")
         jsondump(request)

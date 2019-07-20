@@ -16,24 +16,20 @@ def api(request):
     if header_signature is None:
         logprint("No signature sent by API, aborting message")
         devsay("No signature sent by API for botserv message!")
-        return
     sha_name, signature = header_signature.split('=')
     if sha_name != 'sha1':
         logprint(f"Invalid signature format in API message, was {sha_name}")
-        return
 
     mac = hmac.new(bytes(api_secret, 'utf8'), msg=request.body, digestmod='sha1')
 
     if hexversion >= 0x020707F0:
         if not hmac.compare_digest(str(mac.hexdigest()), str(signature)):
             logprint("Signature mismatch, API event ignored!")
-            return
     else:
         if not str(mac.hexdigest()) == str(signature):
             logprint("Signature mismatch! API event ignored.")
             logprint(f"{mac.hexdigest()} vs {str(signature)}")
             devsay(f"Invalid MAC in API message: {str(signature)}")
-            return
 
     try:
         data = request.jsonbody

@@ -1,10 +1,8 @@
-import time
 import hmac
 
 from pyramid.view import view_config
 from sys import hexversion
 
-from ..models import faillog
 from ..utils import logprint, send, devsay
 
 
@@ -22,7 +20,7 @@ def client(request):
         sha_name, signature = header_signature.split('=')
         if sha_name != 'sha1':
             logprint("Signature not in SHA1 format, aborting.")
-            return
+            possiblefake = True
 
         mac = hmac.new(bytes(client_secret, 'utf8'), msg=request.body, digestmod='sha1')
         if hexversion >= 0x020707F0:
@@ -58,5 +56,7 @@ def client(request):
 
     send("#fuelrats", message, "No Short for you!")
     if possiblefake:
-        send("#ratchat", f"[Client Announcer] Warning! The arriving case is not passing validation information!","")
+        send("#ratchat",
+             f"[Client Announcer] Warning! The arriving case is not passing validation information!",
+             "")
     return

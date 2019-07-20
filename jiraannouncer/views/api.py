@@ -42,3 +42,5 @@ def api(request):
             logprint("No channel specified in API message, aborting.")
             return
         send(channel, data['message'], "")
+    except:
+        logprint("Well, something done fucked up, exception in body parsing/sending.")

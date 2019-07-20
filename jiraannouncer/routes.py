@@ -10,3 +10,4 @@ def includeme(config):
     config.add_route('updater', '/updater')
     config.add_route('upsource', '/upsource')
     config.add_route('teamcity', '/teamcity')
+    config.add_route('api', '/api')

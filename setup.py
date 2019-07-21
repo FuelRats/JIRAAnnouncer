@@ -15,7 +15,7 @@ requires = [
     'pyramid_tm',
     'SQLAlchemy',
     'transaction',
-    'waitress', 'pyramid_scheduler', 'simplejson'
+    'waitress', 'pyramid_scheduler', 'simplejson', 'zope'
 ]
 
 tests_require = [

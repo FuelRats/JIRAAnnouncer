@@ -4,6 +4,7 @@ import re
 import sys
 import time
 from xmlrpc.client import ServerProxy, Error
+from .models.usagelog import UsageLog
 
 logging.basicConfig(filename='webhook.log', level=logging.DEBUG)
 
@@ -65,3 +66,8 @@ def getlast():
         logprint("Error loading pickle (Exception)")
         lastmessage = {'type': " ", 'key': " ", 'time': 0, 'full': " "}
     return lastmessage
+
+
+def logusage(request):
+    logrecord = UsageLog(timestamp=int(time.time()), caller_ip=request.headers['X-Forwarded-For'],
+                         endpoint=request.path_url, body=request.body)

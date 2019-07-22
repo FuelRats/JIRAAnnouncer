@@ -1,6 +1,6 @@
-import simplejson
 import hmac
 import time
+from json import JSONDecodeError
 
 from sys import hexversion
 
@@ -54,7 +54,7 @@ def github(prequest):
     event = prequest.headers['X-GitHub-Event']
     try:
         request = prequest.json_body
-    except:
+    except JSONDecodeError:
         logprint("Error loading GitHub payload:")
         logprint(data)
         devsay("A GitHub payload failed to decode to JSON!")
@@ -161,6 +161,7 @@ def github(prequest):
                     if (time.time() - lastrecord.timestamp) < 300:
                         logprint("Suppressing comment on same as last GitHub message.")
                         return
+            logprint(f"GitHub review comment/commit comment body: {prequest.json_body}")
             message = (f"\x0314 {request['sender']['login']} \x03{request['action']} comment on pull request #" 
                        f"{str(request['pull_request']['number'])}: \"{demarkdown(request['comment']['body'])}\" "
                        f"in \x0306{request['repository']['name']}\x03. \x02\x0311{request['comment']['html_url']}"

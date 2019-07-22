@@ -11,6 +11,7 @@ from .circlemodels import CircleMessage
 from .travismodels import TravisMessage
 from .githubmodels import GitHubMessage
 from .faillog import FailLog
+from .usagelog import UsageLog
 
 # run configure_mappers after defining all of the models to ensure
 # all relationships can be setup

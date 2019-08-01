@@ -71,3 +71,4 @@ def getlast():
 def logusage(request):
     logrecord = UsageLog(timestamp=int(time.time()), caller_ip=request.headers['X-Forwarded-For'],
                          endpoint=request.path_url, body=request.body)
+    request.dbsession.add(logrecord)

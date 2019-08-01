@@ -15,6 +15,7 @@ requires = [
     'pyramid_tm',
     'SQLAlchemy',
     'transaction',
+    'pyramid_prometheus',
     'waitress', 'pyramid_scheduler', 'simplejson', 'zope'
 ]
 

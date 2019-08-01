@@ -60,9 +60,9 @@ def getlast():
         lastmessage = pickle.load(open("lastmessage.p", "rb"))
         logprint("Pickle loaded")
         if not all(key in lastmessage for key in ('type', 'key', 'time', 'full')):
-            logprint("Error loading pickle")
+            logprint("Error loading pickle (Missing key)")
             lastmessage = {'type': " ", 'key': " ", 'time': 0, 'full': " "}
-    except:
+    except pickle.UnpicklingError:
         logprint("Error loading pickle (Exception)")
         lastmessage = {'type': " ", 'key': " ", 'time': 0, 'full': " "}
     return lastmessage

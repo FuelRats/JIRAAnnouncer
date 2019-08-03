@@ -1,4 +1,5 @@
 import logging
+import graypy
 import pickle
 import re
 import sys
@@ -7,11 +8,17 @@ from xmlrpc.client import ServerProxy, Error
 from .models.usagelog import UsageLog
 
 logging.basicConfig(filename='webhook.log', level=logging.DEBUG)
+graylogger = logging.getLogger('gray_logger')
+graylogger.setLevel(logging.DEBUG)
+
+handler = graypy.GELFUDPHandler('5.9.19.231', 5090)
+graylogger.addHandler(handler)
 
 
 def logprint(string):
     """Convert input to string, and print to log, ignoring non-ascii characters."""
     logging.debug(str(string).encode('ascii', 'ignore').decode())
+    graylogger.debug(str(string).encode('ascii', 'ignore').decode())
 
 
 def devsay(string):

@@ -1,8 +1,10 @@
 import simplejson
 from pyramid.view import view_config
 
-from ..utils import logprint, send
+from ..utils import send
+import logging
 
+log = logging.getLogger(__name__)
 prefixOptions = {
     'none': "\x0303",
     'major': "\x02\x0304",
@@ -38,7 +40,7 @@ componentOptions = {
 def statuspage(request):
     """Handle StatusPage updates"""
     if request.body is None:
-        logprint("Empty StatusPage request received, aborting.")
+        log.error("Empty StatusPage request received, aborting.")
         return
     shortlink = ""
     data = simplejson.loads(request.body)

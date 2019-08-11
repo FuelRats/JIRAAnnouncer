@@ -3,7 +3,10 @@ import hmac
 from pyramid.view import view_config
 from sys import hexversion
 
-from ..utils import logprint, send, devsay
+from ..utils import send, devsay
+import logging
+
+log = logging.getLogger(__name__)
 
 
 @view_config(route_name='client', renderer="json")
@@ -16,36 +19,36 @@ def client(request):
         settings = request.registry.settings
         client_secret = settings['client_secret'] if 'client_secret' in settings else None
         header_signature = request.headers['X-Client-Signature']
-        logprint(f"HMAC signature was passed by referrer.")
+        log.debug("HMAC signature was passed by referrer.")
         sha_name, signature = header_signature.split('=')
         if sha_name != 'sha1':
-            logprint("Signature not in SHA1 format, aborting.")
+            log.error("Signature not in SHA1 format, aborting.")
             possiblefake = True
 
         mac = hmac.new(bytes(client_secret, 'utf8'), msg=request.body, digestmod='sha1')
         if hexversion >= 0x020707F0:
             if not hmac.compare_digest(str(mac.hexdigest()), str(signature)):
-                logprint("Signature mismatch, possible fake call!")
+                log.error("Signature mismatch, possible fake call!")
                 possiblefake = True
         else:
             if not str(mac.hexdigest()) == str(signature):
-                logprint("Signature mismatch! GitHub event not parsed.")
-                logprint(f"{mac.hexdigest()} vs {str(signature)}")
+                log.error("Signature mismatch! GitHub event not parsed.")
+                log.error(f"{mac.hexdigest()} vs {str(signature)}")
                 devsay(f"Invalid MAC in Client message: {str(signature)}")
                 possiblefake = True
     elif referer != "https://clients.fuelrats.com:7778/":
-        logprint(f"Client announcer called with invalid referer: {referer}")
+        log.error(f"Client announcer called with invalid referer: {referer}")
         devsay(f"Someone tried to call the client announcer with an invalid referer '{referer}'! Absolver!")
         possiblefake = True
     else:
-        logprint("Non-signed request from valid referer.")
+        log.warn("Non-signed request from valid referer.")
     try:
         cmdrname = request.params['cmdrname']
         system = request.params['system']
         platform = request.params['platform']
         o2status = request.params['EO2']
     except NameError:
-        logprint("Missing parameters to Client announcement call.")
+        log.critical("Missing parameters to Client announcement call.")
         devsay("Parameters were missing in a Client announcement call!")
 
     if 'extradata' not in request.params:

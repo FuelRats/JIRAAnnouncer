@@ -14,6 +14,8 @@ graylogger.setLevel(logging.DEBUG)
 handler = graypy.GELFUDPHandler('5.9.19.231', 5090)
 graylogger.addHandler(handler)
 
+log = logging.getLogger(__name__)
+
 
 def logprint(string):
     """Convert input to string, and print to log, ignoring non-ascii characters."""
@@ -35,7 +37,6 @@ def jsondump(string):
 
 def demarkdown(string):
     """Remove markdown features from and limit length of messages"""
-    logprint(f"Demarkdown of string: {string}")
     string = re.sub('>.*(\n|$)', '', string).replace('`', '').replace('#', '')
     string = re.sub('\n.*', '', string)
     string = re.sub('&gt;', '>', string)
@@ -49,28 +50,27 @@ def send(channel, message, msgshort):
     try:
         messagesplit = [message[i:i + 475] for i in range(0, len(message), 475)]
         for msgpart in messagesplit:
-            logprint(f"{time.strftime('[%H:%M:%S]', time.gmtime())} Sending to {channel}...")
-            logprint(proxy.command("botserv", "ABish", f"say {channel} {msgpart}"))
-            # logprint(msgpart)
+            log.debug(f"Sending to {channel}...")
+            log.debug(proxy.command("botserv", "ABish", f"say {channel} {msgpart}"))
             time.sleep(0.5)
         pickle.dump(msgshort, open("lastmessage.p", "wb"))
     except Error as err:
-        logprint("ERROR" + str(err))
+        log.critical("ERROR" + str(err))
     except:
-        logprint("Error sending message")
-        logprint(sys.exc_info())
+        log.critical("Error sending message")
+        log.critical(sys.exc_info())
         return
 
 
 def getlast():
     try:
         lastmessage = pickle.load(open("lastmessage.p", "rb"))
-        logprint("Pickle loaded")
+        log.info("Pickle loaded")
         if not all(key in lastmessage for key in ('type', 'key', 'time', 'full')):
-            logprint("Error loading pickle (Missing key)")
+            log.warn("Error loading pickle (Missing key)")
             lastmessage = {'type': " ", 'key': " ", 'time': 0, 'full': " "}
     except pickle.UnpicklingError:
-        logprint("Error loading pickle (Exception)")
+        log.error("Error loading pickle (Exception)")
         lastmessage = {'type': " ", 'key': " ", 'time': 0, 'full': " "}
     return lastmessage
 

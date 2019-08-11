@@ -4,8 +4,10 @@ import urllib
 import simplejson
 from pyramid.view import view_config
 
-from ..utils import logprint, send, getlast, devsay
+from ..utils import send, getlast, devsay
+import logging
 
+log = logging.getLogger(__name__)
 OFFSET = 5
 
 
@@ -16,13 +18,12 @@ def travis(request):
     data = request.body.decode('utf-8')
     repo = request.headers['Travis-Repo-Slug']
     if not data.startswith("payload="):
-        logprint("Error in Travis input, expected \"payload=\"")
+        log.error("Error in Travis input, expected \"payload=\"")
         return
     try:
         request = simplejson.loads(urllib.parse.unquote(data[8:]))
     except simplejson.errors.JSONDecodeError:
-        logprint("Error loading Travis payload:")
-        logprint(data)
+        log.error(f"Error loading Travis payload: {data}")
         devsay("Travis couldn't decode a payload! Absolver, check the log.")
         return
 
@@ -39,9 +40,9 @@ def travis(request):
     msgshort1 = {"time": time.time(), "type": "Travis", "key": repo, "full": message1}
     msgshort2 = {"time": time.time(), "type": "Travis", "key": repo, "full": message2}
     if lastmessage['full'] == message2:
-        logprint("Duplicate message, skipping:")
-        logprint(message1)
-        logprint(message2)
+        log.warn("Duplicate message, skipping:")
+        log.debug(message1)
+        log.debug(message2)
     else:
         for channel in channels:
             send(channel, message1, msgshort1)

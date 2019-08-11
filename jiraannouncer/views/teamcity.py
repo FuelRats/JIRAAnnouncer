@@ -1,6 +1,9 @@
 from pyramid.view import view_config
 
-from ..utils import logprint, send
+from ..utils import send
+import logging
+
+log = logging.getLogger(__name__)
 
 notifyTypes = {
     'buildStarted': '\x0311Build Started\x03',
@@ -19,20 +22,20 @@ def teamcity(request):
     """Handle TeamCity CI webhooks."""
     if 'channel' in request.GET.keys():
         channel = f"#{request.GET.getone('channel')}"
-        logprint(f"Targeting channel {channel}")
+        log.debug(f"Targeting channel {channel}")
     else:
         channel = "#rattech"
-    logprint(f"TeamCity called!")
+    log.debug(f"TeamCity called!")
     try:
         jsonbody = request.json_body
     except:
-        logprint("Error loading TeamCity JSON data!")
+        log.error("Error loading TeamCity JSON data!")
         return
     if 'build' in jsonbody:
         build = jsonbody['build']
     else:
         build = {}
-        logprint("No buildinfo in TeamCity call!")
+        log.warn("No buildinfo in TeamCity call!")
     notifytype = build['notifyType']
     if 'buildType' in build['extraParameters']:
         if build['extraParameters']['buildType'] == 'deployment':

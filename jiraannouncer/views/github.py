@@ -1,13 +1,16 @@
 import hmac
 import time
+import logging
 from json import JSONDecodeError
 
 from sys import hexversion
 
 from pyramid.view import view_config
 
-from ..utils import logprint, jsondump, send, getlast, demarkdown, devsay
+from ..utils import jsondump, send, getlast, demarkdown, devsay
 from ..models import githubmodels
+
+log = logging.getLogger(__name__)
 
 
 @view_config(route_name='github', renderer="json")
@@ -23,7 +26,7 @@ def github(prequest):
     timestamp = int(time.time())
 
     if 'X-GitHub-Event' not in prequest.headers:
-        logprint("Malformed request to GitHub webhook handler (Missing X-Github-Event)")
+        log.error("Malformed request to GitHub webhook handler (Missing X-Github-Event)")
         devsay(
              "[\x0315GitHub\x03] Malformed request to GitHub webhook handler (Missing X-GitHub-Event header)")
         return
@@ -31,24 +34,24 @@ def github(prequest):
     if github_secret is not None:
         header_signature = prequest.headers['X-Hub-Signature']
         if header_signature is None:
-            logprint("No signature sent in GitHub event, aborting.")
+            log.critical("No signature sent in GitHub event, aborting.")
             return
         sha_name, signature = header_signature.split('=')
         if sha_name != 'sha1':
-            logprint("Signature not in SHA1 format, aborting.")
+            log.critical("Signature not in SHA1 format, aborting.")
             return
 
         mac = hmac.new(bytes(github_secret, 'utf8'), msg=prequest.body, digestmod='sha1')
 
         if hexversion >= 0x020707F0:
             if not hmac.compare_digest(str(mac.hexdigest()), str(signature)):
-                logprint("Signature mismatch, GitHub event not parsed!")
+                log.critical("Signature mismatch, GitHub event not parsed!")
                 return
         else:
             # Well, aren't you a special snowflake?
             if not str(mac.hexdigest()) == str(signature):
-                logprint("Signature mismatch! GitHub event not parsed.")
-                logprint(f"{mac.hexdigest()} vs {str(signature)}")
+                log.critical("Signature mismatch! GitHub event not parsed.")
+                log.debug(f"{mac.hexdigest()} vs {str(signature)}")
                 devsay(f"Invalid MAC in GitHub message: {str(signature)}")
                 return
 
@@ -56,8 +59,8 @@ def github(prequest):
     try:
         request = prequest.json_body
     except JSONDecodeError:
-        logprint("Error loading GitHub payload:")
-        logprint(data)
+        log.error("Error loading GitHub payload:")
+        log.debug(data)
         devsay("A GitHub payload failed to decode to JSON!")
         return
     domessage = True
@@ -80,13 +83,13 @@ def github(prequest):
     elif event == 'issue_comment':
         lastrecord = prequest.dbsession.query(githubmodels.GitHubMessage).order_by(
             githubmodels.GitHubMessage.id.desc()).first()
-        logprint(lastrecord)
+        log.debug(lastrecord)
         if lastrecord.issue is not None:
-            logprint(f"lastrecord: {lastrecord.issue['number']} current: {request['issue']['number']}")
+            log.debug(f"lastrecord: {lastrecord.issue['number']} current: {request['issue']['number']}")
             if lastrecord.issue['number'] == request['issue']['number'] and lastrecord.sender['login'] == \
                     request['sender']['login']:
                 if (time.time() - lastrecord.timestamp) < 300:
-                    logprint("Suppressing comment by same user on same GitHub issue within 300s.")
+                    log.info("Suppressing comment by same user on same GitHub issue within 300s.")
                     return
         message = (f"\x0314 {request['sender']['login']} \x03{request['action']} comment on issue #"
                    f"{request['issue']['number']}: \"{demarkdown(request['comment']['body'])}\" in \x0306"
@@ -127,7 +130,7 @@ def github(prequest):
                        f"\x03 in \x0306{request['repository']['name']}\x03. \x02\x0311" 
                        f"{request['pull_request']['html_url']}\x02\x03")
     elif event == 'pull_request_review':
-        logprint("pull request review event:")
+        log.debug("pull request review event:")
         gitrecord = githubmodels.GitHubMessage(action=request['action'] or None, timestamp=timestamp,
                                                number=None, issue=None, comment=None,
                                                repository=request['repository'] or None,
@@ -136,14 +139,14 @@ def github(prequest):
                                                pull_request=request['pull_request'] or None,
                                                changes=None)
         if request['action'] == "commented":
-            logprint("Probable duplicate review comment event ignored.")
+            log.info("Probable duplicate review comment event ignored.")
             return
 
         if request['action'] == "submitted":
-            logprint("Review Submitted")
+            log.debug("Review Submitted")
             action = request['review']['state']
         else:
-            logprint(f"Review action: {request['action']}")
+            log.debug(f"Review action: {request['action']}")
             action = request['action']
 
         message = (f"\x0314 {request['sender']['login']} \x03{action}\x03 review of\x0314" 
@@ -152,7 +155,7 @@ def github(prequest):
                    f"\"{demarkdown(request['review']['body'] or '')}\" "
                    f"in \x0306{request['repository']['name']}\x03. "
                    f"\x02\x0311{request['review']['html_url']}\x02\x03")
-        logprint(f"Raw message: {message}")
+        log.debug(f"Raw message: {message}")
     elif event == 'pull_request_review_comment':
         if request['comment']['user']['login'] == "houndci-bot":
             message = (f"Style errors found on pull request #{str(request['pull_request']['number'])}: \""
@@ -161,14 +164,14 @@ def github(prequest):
             lastrecord = prequest.dbsession.query(githubmodels.GitHubMessage).order_by(
                 githubmodels.GitHubMessage.id.desc()).first()
             if lastrecord.pull_request is not None:
-                logprint(f"lastrecord: {lastrecord.pull_request['number']} "
+                log.debug(f"lastrecord: {lastrecord.pull_request['number']} "
                          f"current: {request['pull_request']['number']}")
                 if lastrecord.pull_request['number'] == request['pull_request']['number'] and \
                         lastrecord.sender['login'] == request['sender']['login']:
                     if (time.time() - lastrecord.timestamp) < 300:
-                        logprint("Suppressing comment on same as last GitHub message.")
+                        log.info("Suppressing comment on same as last GitHub message.")
                         return
-            logprint(f"GitHub review comment/commit comment body: {prequest.json_body}")
+            log.debug(f"GitHub review comment/commit comment body: {prequest.json_body}")
             message = (f"\x0314 {request['sender']['login']} \x03{request['action']} comment " 
                        f"on pull request #{str(request['pull_request']['number'])}: "
                        f"\"{demarkdown(request['comment']['body'])}\" "
@@ -213,18 +216,18 @@ def github(prequest):
                        f" in \x0306{request['repository']['name']} \x03.")
             gitrecord = None
         else:
-            logprint(f"Unhandled create ref: {request['ref_type']}")
+            log.debug(f"Unhandled create ref: {request['ref_type']}")
             devsay(f"An unhandled create ref was passed to GitHub: "
                    f"{request['ref_type']}. Absolver should implement!")
             return
     elif event == 'status':
-        logprint("Ignored github status event")
+        log.info("Ignored github status event")
         return
     elif event == 'release':
         message = (f"\x0314New release\x03 \x0311{request['name']}\x03 from {request['repository']} by\x0314 "
                    f"{request['sender']} \x03(\x02\x0311{request['url']}\x03)")
     else:
-        logprint(f"GitHub unhandled event: {event}")
+        log.debug(f"GitHub unhandled event: {event}")
         jsondump(request)
         devsay(f"An unhandled GitHub event was passed: {event}. Absolver should implement!")
         return
@@ -235,16 +238,16 @@ def github(prequest):
         oldrecords = prequest.dbsession.query(githubmodels.GitHubMessage).\
             filter(githubmodels.GitHubMessage.timestamp < timeout)
         if oldrecords.count() > 0:
-            logprint(f"Deleted {oldrecords.count()} old GitHub messages.")
+            log.info(f"Deleted {oldrecords.count()} old GitHub messages.")
             prequest.dbsession.query(githubmodels.GitHubMessage).\
                 filter(githubmodels.GitHubMessage.timestamp < timeout).delete()
     if lastmessage['full'] == message:
-        logprint("Duplicate message, skipping:")
-        logprint(message)
+        log.info("Duplicate message, skipping:")
+        log.info(message)
     else:
         if domessage:
             if request['sender']['login'] == "dependabot[bot]" and event != "pull_request":
-                logprint("Discarding Dependabot message.")
+                log.info("Discarding Dependabot message.")
                 return
             for channel in channels:
                 send(channel, f"[\x0315GitHub\x03] {message}", msgshort)

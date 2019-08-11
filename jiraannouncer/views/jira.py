@@ -4,8 +4,10 @@ import time
 import simplejson
 from pyramid.view import view_config
 
-from ..utils import logprint, send, getlast, devsay
+from ..utils import send, getlast, devsay
+import logging
 
+log = logging.getLogger(__name__)
 OFFSET = 5
 
 
@@ -16,8 +18,8 @@ def jira(request):
     try:
         data = request.json_body
     except:
-        logprint("Failed to decode JSON from body. Dump:")
-        logprint(request.body)
+        log.error("Failed to decode JSON from body. Dump:")
+        log.debug(request.body)
         devsay("A JIRA payload couldn't be decoded. Absolver, check the logfile!")
         return
     request_type = data['webhookEvent']
@@ -46,8 +48,8 @@ def jira(request):
     if 'issue' in data:
         fields = data['issue']['fields']
     else:
-        logprint("No issue key in JIRA webhook body, dumping:")
-        logprint(request.body)
+        log.debug("No issue key in JIRA webhook body, dumping:")
+        log.debug(request.body)
         fields = data
     if request_type == 'jira:issue_created':
         if "OV-" in issue_key or "DRR-" in issue_key:
@@ -85,7 +87,7 @@ def jira(request):
                 if kfile2.readline() == this_kennel:
                     domessage = True
                 else:
-                    logprint("JIRA Automation report suppressed")
+                    log.info("JIRA Automation report suppressed")
             else:
                 if (data['issue']['fields']['status']['id'] == "10400" or
                         data['issue']['fields']['status']['id'] == "10600"):
@@ -102,7 +104,7 @@ def jira(request):
                 if len(data['changelog']['items']) == 1:
                     if data['changelog']['items'][0]['field'] == "Rank" or \
                             data['changelog']['items'][0]['field'] == "Sprint":
-                        logprint("Rank or sprint change ignored")
+                        log.info("Rank or sprint change ignored")
                         domessage = False
                         return
             if "user" not in data:
@@ -160,7 +162,7 @@ def jira(request):
     else:
         message = "JIRA unhandled event: " + request_type
         devsay(f"An unhandled JIRA event '{request_type}' was passed to webhook. Absolver should implement.")
-        logprint(message)
+        log.debug(f"Unhandled JIRA event: {message}")
         return
 
     msgshort = {"time": time.time(), "type": request_type, "key": issue_key, "full": message}
@@ -176,8 +178,7 @@ def jira(request):
             lastmessage['time'] > time.time() - (OFFSET * 60) and
             data['issue_event_type_name'] != "issue_commented" and
             squadstatuschange is False):
-        logprint("Duplicate message, skipping:")
-        logprint(message)
+        log.warn(f"Duplicate squad message, skipping: {message}")
         return
     elif domessage:
         for channel in channels:

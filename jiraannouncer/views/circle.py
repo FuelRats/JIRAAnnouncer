@@ -3,8 +3,10 @@ import time
 import simplejson
 from pyramid.view import view_config
 
-from ..utils import logprint, jsondump, send, getlast
+from ..utils import jsondump, send, getlast
+import logging
 
+log = logging.getLogger(__name__)
 OFFSET = 5
 
 
@@ -15,11 +17,11 @@ def circle(request):
     try:
         data = simplejson.loads(request.body)['payload']
     except simplejson.errors.JSONDecodeError:
-        logprint("Failed to decode JSON from Circle. Dump:")
-        logprint(request.body)
+        log.critical("Failed to decode JSON from Circle. Dump:")
+        log.debug(request.body)
         return
     if 'reponame' not in data:
-        logprint("No repository name in request!")
+        log.warn("No repository name in request!")
         data['reponame'] = "Unset"
         channels = ['#rattech']
     else:
@@ -33,7 +35,7 @@ def circle(request):
             channels = ['#rattech']
 
     if 'compare' not in data or data['compare'] is None:
-        logprint(f"No compare URL in CircleCI data, dumping: {data}")
+        log.debug(f"No compare URL in CircleCI data, dumping: {data}")
         if len(data['all_commit_details']) > 0:
             compareurl = data['all_commit_details'][0]['commit_url']
         elif len(data['pull_requests']) > 0:
@@ -42,8 +44,8 @@ def circle(request):
             compareurl = "\x0302null\x0a3"
     else:
         compareurl = data['compare']
-        logprint(f"Setting to data field compare: {data['compare']}")
-        logprint(f"Full dump: {data}")
+        log.debug(f"Setting to data field compare: {data['compare']}")
+        log.debug(f"Full dump: {data}")
     message1 = f"""
                 [\x0315CircleCI\x03] \x0306 {data['reponame'] or ''}/{data['reponame'] or ''}
                  \x03#{data['build_num'] or ''} (\x0306{data['branch'] or ''}\x03 -  
@@ -58,9 +60,9 @@ def circle(request):
     msgshort1 = {"time": time.time(), "type": "Circle", "key": data['reponame'], "full": message1}
     msgshort2 = {"time": time.time(), "type": "Circle", "key": data['reponame'], "full": message2}
     if lastmessage['full'] == message2:
-        logprint("Duplicate message, skipping:")
-        logprint(message1)
-        logprint(message2)
+        log.warn("Duplicate message, skipping:")
+        log.debug(message1)
+        log.debug(message2)
     else:
         for channel in channels:
             send(channel, message1, msgshort1)

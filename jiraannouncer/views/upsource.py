@@ -2,7 +2,10 @@ import simplejson
 
 from pyramid.view import view_config
 
-from ..utils import logprint, send, demarkdown, devsay
+from ..utils import send, demarkdown, devsay
+import logging
+
+log = logging.getLogger(__name__)
 
 
 @view_config(route_name='upsource', renderer='json')
@@ -11,15 +14,15 @@ def upsource(request):
     message = ''
     if 'channel' in request.GET.keys():
         channel = f"#{request.GET.getone('channel')}"
-        logprint(f"Targeting channel {channel}")
+        log.debug(f"Targeting channel {channel}")
     else:
         channel = "#announcerdev"
-    logprint(f"Raw UpSource data: {request.body}")
+    log.debug(f"Raw UpSource data: {request.body}")
     try:
         jsonbody = simplejson.loads(request.body)
     except simplejson.JSONDecodeError:
-        logprint("Error loading UpSource JSON data!")
-        logprint(request.body)
+        log.error("Error loading UpSource JSON data!")
+        log.error(request.body)
         devsay(f"Error loading UpSource JSON data!")
         return
     event = jsonbody['dataType']
@@ -34,5 +37,5 @@ def upsource(request):
         message = f"New revision: {data['revisionId']} by {demarkdown(data['author'])}:" \
             f" \"{demarkdown(data['message'])}\""
     else:
-        logprint(f"Unhandled UpSource event: {event}")
+        log.warn(f"Unhandled UpSource event: {event}")
     send(channel, message, '')

@@ -18,4 +18,4 @@ class UsageLog(Base):
     body = Column(Text)
 
 
-Index('faillog_idx', UsageLog.id, unique=True)
+Index('usagelog_idx', UsageLog.id, unique=True)

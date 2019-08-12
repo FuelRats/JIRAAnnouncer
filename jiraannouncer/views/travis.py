@@ -24,7 +24,7 @@ def travis(request):
         request = simplejson.loads(urllib.parse.unquote(data[8:]))
     except simplejson.errors.JSONDecodeError:
         log.error(f"Error loading Travis payload: {data}")
-        devsay("Travis couldn't decode a payload! Absolver, check the log.")
+        devsay("Travis couldn't decode a payload! Absolver, check the log.", request)
         return
 
     if "FuelRats/pipsqueak3" in repo:
@@ -45,7 +45,7 @@ def travis(request):
         log.debug(message2)
     else:
         for channel in channels:
-            send(channel, message1, msgshort1)
+            send(channel, message1, msgshort1, request)
         time.sleep(0.5)
         for channel in channels:
-            send(channel, message2, msgshort2)
+            send(channel, message2, msgshort2, request)

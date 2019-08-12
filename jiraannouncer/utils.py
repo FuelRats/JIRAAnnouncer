@@ -25,9 +25,9 @@ def logprint(string):
     graylogger.debug(str(string).encode('ascii', 'ignore').decode())
 
 
-def devsay(string):
+def devsay(string, request):
     """Sends a message to the Announcer dev channel for debugging/reporting purposes."""
-    send("#announcerdev", string, '')
+    send("#announcerdev", string, '', request)
 
 
 def jsondump(string):
@@ -45,10 +45,10 @@ def demarkdown(string):
     return string[:300] + ('...' if len(string) > 300 else '')
 
 
-def send(channel, message, msgshort):
+def send(channel, message, msgshort, request):
     """Send resulting message to IRC over XMLRPC."""
     message = message.replace('\n', ' ').replace('\r', '')
-    serverurl = registry.settings['xml_proxy']
+    serverurl = request.registry.settings['xml_proxy']
     proxy = ServerProxy(serverurl)
     try:
         messagesplit = [message[i:i + 475] for i in range(0, len(message), 475)]

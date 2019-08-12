@@ -20,7 +20,8 @@ def jira(request):
     except:
         log.error("Failed to decode JSON from body. Dump:")
         log.debug(request.body)
-        devsay("A JIRA payload couldn't be decoded. Absolver, check the logfile!")
+        devsay("A JIRA payload couldn't be decoded. Absolver, check the logfile!",
+               request)
         return
     request_type = data['webhookEvent']
 
@@ -161,7 +162,8 @@ def jira(request):
         domessage = False
     else:
         message = "JIRA unhandled event: " + request_type
-        devsay(f"An unhandled JIRA event '{request_type}' was passed to webhook. Absolver should implement.")
+        devsay(f"An unhandled JIRA event '{request_type}' was passed to webhook. Absolver should implement.",
+               request)
         log.debug(f"Unhandled JIRA event: {message}")
         return
 
@@ -182,5 +184,5 @@ def jira(request):
         return
     elif domessage:
         for channel in channels:
-            send(channel, f"[\x0315JIRA\x03] {message}", msgshort)
+            send(channel, f"[\x0315JIRA\x03] {message}", msgshort, request)
         return

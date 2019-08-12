@@ -34,11 +34,12 @@ def client(request):
             if not str(mac.hexdigest()) == str(signature):
                 log.error("Signature mismatch! GitHub event not parsed.")
                 log.error(f"{mac.hexdigest()} vs {str(signature)}")
-                devsay(f"Invalid MAC in Client message: {str(signature)}")
+                devsay(f"Invalid MAC in Client message: {str(signature)}", request)
                 possiblefake = True
     elif referer != "https://clients.fuelrats.com:7778/":
         log.error(f"Client announcer called with invalid referer: {referer}")
-        devsay(f"Someone tried to call the client announcer with an invalid referer '{referer}'! Absolver!")
+        devsay(f"Someone tried to call the client announcer with an invalid referer '{referer}'! Absolver!",
+               request)
         possiblefake = True
     else:
         log.warn("Non-signed request from valid referer.")
@@ -49,7 +50,7 @@ def client(request):
         o2status = request.params['EO2']
     except NameError:
         log.critical("Missing parameters to Client announcement call.")
-        devsay("Parameters were missing in a Client announcement call!")
+        devsay("Parameters were missing in a Client announcement call!", request)
 
     if 'extradata' not in request.params:
         message = f"Incoming Client: {cmdrname} - System: {system} - Platform: {platform} - O2: {o2status}"
@@ -57,9 +58,9 @@ def client(request):
         extradata = request.params['extradata']
         message = f"Incoming Client: {cmdrname} - System: {system} - Platform: {platform} - O2: {o2status} - {extradata}"
 
-    send("#fuelrats", message, "No Short for you!")
+    send("#fuelrats", message, "No Short for you!", request)
     if possiblefake:
         send("#ratchat",
              f"[Client Announcer] Warning! The arriving case is not passing validation information!",
-             "")
+             "", request)
     return

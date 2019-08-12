@@ -49,6 +49,7 @@ def send(channel, message, msgshort, request):
     """Send resulting message to IRC over XMLRPC."""
     message = message.replace('\n', ' ').replace('\r', '')
     serverurl = request.registry.settings['xml_proxy']
+    print(f"Proxy: {serverurl}")
     proxy = ServerProxy(serverurl)
     try:
         messagesplit = [message[i:i + 475] for i in range(0, len(message), 475)]

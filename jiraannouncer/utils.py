@@ -6,6 +6,7 @@ import sys
 import time
 from xmlrpc.client import ServerProxy, Error
 from .models.usagelog import UsageLog
+from pyramid import threadlocal
 
 logging.basicConfig(filename='webhook.log', level=logging.DEBUG)
 graylogger = logging.getLogger('gray_logger')
@@ -15,6 +16,7 @@ handler = graypy.GELFUDPHandler('5.9.19.231', 5090)
 graylogger.addHandler(handler)
 
 log = logging.getLogger(__name__)
+registry = threadlocal.get_current_registry()
 
 
 def logprint(string):
@@ -23,9 +25,9 @@ def logprint(string):
     graylogger.debug(str(string).encode('ascii', 'ignore').decode())
 
 
-def devsay(string):
+def devsay(string, request):
     """Sends a message to the Announcer dev channel for debugging/reporting purposes."""
-    send("#announcerdev", string, '')
+    send("#announcerdev", string, '', request)
 
 
 def jsondump(string):
@@ -43,10 +45,12 @@ def demarkdown(string):
     return string[:300] + ('...' if len(string) > 300 else '')
 
 
-def send(channel, message, msgshort):
+def send(channel, message, msgshort, request):
     """Send resulting message to IRC over XMLRPC."""
     message = message.replace('\n', ' ').replace('\r', '')
-    proxy = ServerProxy("https://irc.eu.fuelrats.com:6080/xmlrpc")
+    serverurl = request.registry.settings['xml_proxy']
+    print(f"Proxy: {serverurl}")
+    proxy = ServerProxy(serverurl)
     try:
         messagesplit = [message[i:i + 475] for i in range(0, len(message), 475)]
         for msgpart in messagesplit:

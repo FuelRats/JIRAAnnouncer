@@ -28,7 +28,8 @@ def github(prequest):
     if 'X-GitHub-Event' not in prequest.headers:
         log.error("Malformed request to GitHub webhook handler (Missing X-Github-Event)")
         devsay(
-             "[\x0315GitHub\x03] Malformed request to GitHub webhook handler (Missing X-GitHub-Event header)")
+             "[\x0315GitHub\x03] Malformed request to GitHub webhook handler (Missing X-GitHub-Event header)",
+             prequest)
         return
 
     if github_secret is not None:
@@ -52,7 +53,7 @@ def github(prequest):
             if not str(mac.hexdigest()) == str(signature):
                 log.critical("Signature mismatch! GitHub event not parsed.")
                 log.debug(f"{mac.hexdigest()} vs {str(signature)}")
-                devsay(f"Invalid MAC in GitHub message: {str(signature)}")
+                devsay(f"Invalid MAC in GitHub message: {str(signature)}", prequest)
                 return
 
     event = prequest.headers['X-GitHub-Event']
@@ -61,7 +62,7 @@ def github(prequest):
     except JSONDecodeError:
         log.error("Error loading GitHub payload:")
         log.debug(data)
-        devsay("A GitHub payload failed to decode to JSON!")
+        devsay("A GitHub payload failed to decode to JSON!", prequest)
         return
     domessage = True
 
@@ -218,7 +219,7 @@ def github(prequest):
         else:
             log.debug(f"Unhandled create ref: {request['ref_type']}")
             devsay(f"An unhandled create ref was passed to GitHub: "
-                   f"{request['ref_type']}. Absolver should implement!")
+                   f"{request['ref_type']}. Absolver should implement!", prequest)
             return
     elif event == 'status':
         log.info("Ignored github status event")
@@ -229,7 +230,8 @@ def github(prequest):
     else:
         log.debug(f"GitHub unhandled event: {event}")
         jsondump(request)
-        devsay(f"An unhandled GitHub event was passed: {event}. Absolver should implement!")
+        devsay(f"An unhandled GitHub event was passed: {event}. Absolver should implement!",
+               prequest)
         return
     msgshort = {"time": time.time(), "type": event, "key": "GitHub", "full": message}
     if gitrecord is not None:
@@ -250,4 +252,4 @@ def github(prequest):
                 log.info("Discarding Dependabot message.")
                 return
             for channel in channels:
-                send(channel, f"[\x0315GitHub\x03] {message}", msgshort)
+                send(channel, f"[\x0315GitHub\x03] {message}", msgshort, prequest)

@@ -1,3 +1,17 @@
+1.1 - released 16.08.2019
+---
+
+- Quiet down Dependabot spam
+- Numerous fixes for formatting and unhandled events.
+- Add in-channel critical error reporting in #announcerdev
+- Switch from static message cache files to in-database duplicate prevention
+- Add Upsource and Teamcity support
+- Add HMAC authentication for client endpoint.
+- Add basic Pyramid process Prometheus counters.
+- Switch to Pyramid based logger, stop using utils.py for all logging.
+- Implement Graylog
+- Move hardcoded XMLRPC data to config file
+
 1.0 - released 03.06.2019
 ---
 

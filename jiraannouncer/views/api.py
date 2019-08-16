@@ -18,7 +18,7 @@ def api(request):
     header_signature = request.headers['X-Api-Signature']
     if header_signature is None:
         log.error("No signature sent by API, aborting message")
-        devsay("No signature sent by API for botserv message!")
+        devsay("No signature sent by API for botserv message!", request)
     sha_name, signature = header_signature.split('=')
     if sha_name != 'sha1':
         log.error(f"Invalid signature format in API message, was {sha_name}")
@@ -32,7 +32,7 @@ def api(request):
         if not str(mac.hexdigest()) == str(signature):
             log.critical("Signature mismatch! API event ignored.")
             log.critical(f"{mac.hexdigest()} vs {str(signature)}")
-            devsay(f"Invalid MAC in API message: {str(signature)}")
+            devsay(f"Invalid MAC in API message: {str(signature)}", request)
 
     try:
         data = request.jsonbody
@@ -40,6 +40,6 @@ def api(request):
         if not channel:
             log.error("No channel specified in API message, aborting.")
             return
-        send(channel, data['message'], "")
+        send(channel, data['message'], "", request)
     except:
         log.critical("Well, something done fucked up, exception in body parsing/sending.")

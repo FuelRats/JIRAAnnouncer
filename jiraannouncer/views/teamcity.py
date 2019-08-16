@@ -41,16 +41,16 @@ def teamcity(request):
         if build['extraParameters']['buildType'] == 'deployment':
             message = f"\x0315[\x0306TeamCity\x0315]\x03 {build['projectName']} - " \
                         f"deploying from {build['agentName']}"
-            send(channel, message, '')
+            send(channel, message, '', request)
     message = f"\x0315[\x0306TeamCity\x0315]\x03 {build['projectName']} - " \
         f"{notifyTypes[notifytype]} on {build['agentName']}: Build #\x0315{build['buildId']}\x03 " \
         f"{buildresults[build['buildResult']]} (\x0315{build['buildStatusUrl']}\x03)"
-    send(channel, message, '')
+    send(channel, message, '', request)
     if build['buildResultDelta'] == 'fixed':
         message = f"\0315[\x0306TeamCity\x0315]\x03 Yay! {build['projectName']} builds fixed!"
-        send(channel, message, '')
+        send(channel, message, '', request)
     elif build['buildResultDelta'] == 'broken':
         message = f"\x0315[\x0306TeamCity\x0315]\x03 Alert! Builds for {build['projectName']}" \
             f" have started failing!"
-        send(channel, message, '')
+        send(channel, message, '', request)
     return

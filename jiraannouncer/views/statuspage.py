@@ -61,5 +61,5 @@ def statuspage(request):
                    )
     else:
         message = "Something went horribly wrong in Statuspage processing."
-    send("#ratchat", f"{status_name} {message} {shortlink or ''}", "No shorts today.")
+    send("#ratchat", f"{status_name} {message} {shortlink or ''}", "No shorts today.", request)
     return

@@ -65,7 +65,7 @@ def circle(request):
         log.debug(message2)
     else:
         for channel in channels:
-            send(channel, message1, msgshort1)
+            send(channel, message1, msgshort1, request)
         time.sleep(0.5)
         for channel in channels:
-            send(channel, message2, msgshort2)
+            send(channel, message2, msgshort2, request)

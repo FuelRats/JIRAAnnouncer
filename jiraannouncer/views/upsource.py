@@ -23,7 +23,7 @@ def upsource(request):
     except simplejson.JSONDecodeError:
         log.error("Error loading UpSource JSON data!")
         log.error(request.body)
-        devsay(f"Error loading UpSource JSON data!")
+        devsay(f"Error loading UpSource JSON data!", request)
         return
     event = jsonbody['dataType']
     if 'data' in jsonbody:
@@ -38,4 +38,4 @@ def upsource(request):
             f" \"{demarkdown(data['message'])}\""
     else:
         log.warn(f"Unhandled UpSource event: {event}")
-    send(channel, message, '')
+    send(channel, message, '', request)

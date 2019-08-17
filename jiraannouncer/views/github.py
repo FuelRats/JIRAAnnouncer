@@ -9,8 +9,12 @@ from pyramid.view import view_config
 
 from ..utils import jsondump, send, getlast, demarkdown, devsay
 from ..models import githubmodels
+from prometheus_client import Counter
 
 log = logging.getLogger(__name__)
+announcer_github_signfail = Counter('announcer_github_failed', 'Calls to Github announcer with invalid MAC')
+announcer_github_requests = Counter('announcer_github_requests', 'Calls to Github announcer')
+announcer_github_decodefail = Counter('announcer_github_decodefail', 'Failed Github decodes')
 
 
 @view_config(route_name='github', renderer="json")
@@ -47,6 +51,7 @@ def github(prequest):
         if hexversion >= 0x020707F0:
             if not hmac.compare_digest(str(mac.hexdigest()), str(signature)):
                 log.critical("Signature mismatch, GitHub event not parsed!")
+                announcer_github_signfail.inc()
                 return
         else:
             # Well, aren't you a special snowflake?
@@ -54,6 +59,7 @@ def github(prequest):
                 log.critical("Signature mismatch! GitHub event not parsed.")
                 log.debug(f"{mac.hexdigest()} vs {str(signature)}")
                 devsay(f"Invalid MAC in GitHub message: {str(signature)}", prequest)
+                announcer_github_signfail.inc()
                 return
 
     event = prequest.headers['X-GitHub-Event']
@@ -63,6 +69,7 @@ def github(prequest):
         log.error("Error loading GitHub payload:")
         log.debug(data)
         devsay("A GitHub payload failed to decode to JSON!", prequest)
+        announcer_github_decodefail.inc()
         return
     domessage = True
 
@@ -248,6 +255,7 @@ def github(prequest):
         log.info(message)
     else:
         if domessage:
+            announcer_github_requests.inc()
             if request['sender']['login'] == "dependabot[bot]" and event != "pull_request":
                 log.info("Discarding Dependabot message.")
                 return

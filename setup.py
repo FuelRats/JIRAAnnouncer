@@ -21,7 +21,7 @@ requires = [
     'simplejson',
     'zope',
     'graypy',
-    'wheel'
+    'wheel', 'prometheus_client'
 ]
 
 tests_require = [

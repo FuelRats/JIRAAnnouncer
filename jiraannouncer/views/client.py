@@ -38,10 +38,11 @@ def client(request):
             if not hmac.compare_digest(str(mac.hexdigest()), str(signature)):
                 log.error("Signature mismatch, possible fake call!")
                 announcer_client_signfail.inc()
+                devsay(f"Invalid MAC in Client message: {str(signature)}", request)
                 possiblefake = True
         else:
             if not str(mac.hexdigest()) == str(signature):
-                log.error("Signature mismatch! GitHub event not parsed.")
+                log.error("Signature mismatch, possible fake call!")
                 log.error(f"{mac.hexdigest()} vs {str(signature)}")
                 devsay(f"Invalid MAC in Client message: {str(signature)}", request)
                 possiblefake = True

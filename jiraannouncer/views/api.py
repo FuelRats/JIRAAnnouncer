@@ -29,6 +29,8 @@ def api(request):
     if hexversion >= 0x020707F0:
         if not hmac.compare_digest(str(mac.hexdigest()), str(signature)):
             log.critical("Signature mismatch, API event ignored!")
+            log.critical(f"{mac.hexdigest()} vs {str(signature)}")
+            devsay(f"Invalid MAC in API message: {str(signature)}", request)
     else:
         if not str(mac.hexdigest()) == str(signature):
             log.critical("Signature mismatch! API event ignored.")

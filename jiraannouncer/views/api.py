@@ -36,7 +36,7 @@ def api(request):
             devsay(f"Invalid MAC in API message: {str(signature)}", request)
 
     try:
-        data = request.jsonbody
+        data = request.json_body
         channel = data['channel']
         if not channel:
             log.error("No channel specified in API message, aborting.")

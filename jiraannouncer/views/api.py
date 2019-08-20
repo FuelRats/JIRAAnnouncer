@@ -1,4 +1,5 @@
 import hmac
+from json import JSONDecodeError
 from sys import hexversion
 
 from pyramid.view import view_config
@@ -41,5 +42,5 @@ def api(request):
             log.error("No channel specified in API message, aborting.")
             return
         send(channel, data['message'], "", request)
-    except:
-        log.critical("Well, something done fucked up, exception in body parsing/sending.")
+    except JSONDecodeError as e:
+        log.exception("Well, something done fucked up, exception in body parsing/sending.")

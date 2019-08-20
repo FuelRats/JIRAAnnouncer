@@ -1,7 +1,7 @@
 import random
 import time
+from json import JSONDecodeError
 
-import simplejson
 from pyramid.view import view_config
 
 from ..utils import send, getlast, devsay
@@ -17,7 +17,7 @@ def jira(request):
     lastmessage = getlast()
     try:
         data = request.json_body
-    except:
+    except JSONDecodeError:
         log.error("Failed to decode JSON from body. Dump:")
         log.debug(request.body)
         devsay("A JIRA payload couldn't be decoded. Absolver, check the logfile!",

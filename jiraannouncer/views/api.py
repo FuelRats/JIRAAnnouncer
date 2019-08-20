@@ -15,7 +15,7 @@ def api(request):
     settings = request.registry.settings
     api_secret = settings['api_secret'] if 'api_secret' in settings else None
 
-    header_signature = request.headers['X-Api-Signature']
+    header_signature = request.headers['X-Api-Signature'] if 'X-Api-Signature' in request.headers else None
     if header_signature is None:
         log.error("No signature sent by API, aborting message")
         devsay("No signature sent by API for botserv message!", request)

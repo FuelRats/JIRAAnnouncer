@@ -30,31 +30,31 @@ def github(prequest):
         devsay(
              "[\x0315GitHub\x03] Malformed request to GitHub webhook handler (Missing X-GitHub-Event header)",
              prequest)
-        return
+        return {'error': 'MAC verification failed!'}
 
     if github_secret is not None:
         header_signature = prequest.headers['X-Hub-Signature']
         if header_signature is None:
             log.critical("No signature sent in GitHub event, aborting.")
-            return
+            return {'error': 'MAC verification failed!'}
         sha_name, signature = header_signature.split('=')
         if sha_name != 'sha1':
             log.critical("Signature not in SHA1 format, aborting.")
-            return
+            return {'error': 'MAC verification failed!'}
 
         mac = hmac.new(bytes(github_secret, 'utf8'), msg=prequest.body, digestmod='sha1')
 
         if hexversion >= 0x020707F0:
             if not hmac.compare_digest(str(mac.hexdigest()), str(signature)):
                 log.critical("Signature mismatch, GitHub event not parsed!")
-                return
+                return {'error': 'MAC verification failed!'}
         else:
             # Well, aren't you a special snowflake?
             if not str(mac.hexdigest()) == str(signature):
                 log.critical("Signature mismatch! GitHub event not parsed.")
                 log.debug(f"{mac.hexdigest()} vs {str(signature)}")
                 devsay(f"Invalid MAC in GitHub message: {str(signature)}", prequest)
-                return
+                return {'error': 'MAC verification failed!'}
 
     event = prequest.headers['X-GitHub-Event']
     try:
@@ -63,7 +63,7 @@ def github(prequest):
         log.error("Error loading GitHub payload:")
         log.debug(data)
         devsay("A GitHub payload failed to decode to JSON!", prequest)
-        return
+        return {'error': 'Not a valid JSON payload!'}
     domessage = True
 
     if 'repository' in request and request['repository']['name'] in ["pipsqueak3", "limpet", "MechaChainsaw"]:
@@ -91,7 +91,7 @@ def github(prequest):
                     request['sender']['login']:
                 if (time.time() - lastrecord.timestamp) < 300:
                     log.info("Suppressing comment by same user on same GitHub issue within 300s.")
-                    return
+                    return {'status': 'Message suppressed.'}
         message = (f"\x0314 {request['sender']['login']} \x03{request['action']} comment on issue #"
                    f"{request['issue']['number']}: \"{demarkdown(request['comment']['body'])}\" in \x0306"
                    f"{request['repository']['name']}\x03. \x02\x0311{request['comment']['html_url']}\x02\x03")
@@ -141,7 +141,7 @@ def github(prequest):
                                                changes=None)
         if request['action'] == "commented":
             log.info("Probable duplicate review comment event ignored.")
-            return
+            return {'status': 'Message suppressed.'}
 
         if request['action'] == "submitted":
             log.debug("Review Submitted")
@@ -171,7 +171,7 @@ def github(prequest):
                         lastrecord.sender['login'] == request['sender']['login']:
                     if (time.time() - lastrecord.timestamp) < 300:
                         log.info("Suppressing comment on same as last GitHub message.")
-                        return
+                        return {'status': 'Message suppressed.'}
             log.debug(f"GitHub review comment/commit comment body: {prequest.json_body}")
             message = (f"\x0314 {request['sender']['login']} \x03{request['action']} comment " 
                        f"on pull request #{str(request['pull_request']['number'])}: "
@@ -220,7 +220,7 @@ def github(prequest):
             log.debug(f"Unhandled create ref: {request['ref_type']}")
             devsay(f"An unhandled create ref was passed to GitHub: "
                    f"{request['ref_type']}. Absolver should implement!", prequest)
-            return
+            return {'status': 'Unimplemented event.'}
     elif event == 'status':
         log.info("Ignored github status event")
         return
@@ -232,7 +232,7 @@ def github(prequest):
         jsondump(request)
         devsay(f"An unhandled GitHub event was passed: {event}. Absolver should implement!",
                prequest)
-        return
+        return {'status': 'Unimplemented event.'}
     msgshort = {"time": time.time(), "type": event, "key": "GitHub", "full": message}
     if gitrecord is not None:
         prequest.dbsession.add(gitrecord)
@@ -250,6 +250,6 @@ def github(prequest):
         if domessage:
             if request['sender']['login'] == "dependabot[bot]" and event != "pull_request":
                 log.info("Discarding Dependabot message.")
-                return
+                return {'status': 'Go away, Dependabot.'}
             for channel in channels:
                 send(channel, f"[\x0315GitHub\x03] {message}", msgshort, prequest)

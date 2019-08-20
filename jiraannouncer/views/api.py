@@ -20,6 +20,7 @@ def api(request):
     if header_signature is None:
         log.error("No signature sent by API, aborting message")
         devsay("No signature sent by API for botserv message!", request)
+        return {'error': 'MAC verification failed!'}
     sha_name, signature = header_signature.split('=')
     if sha_name != 'sha1':
         log.error(f"Invalid signature format in API message, was {sha_name}")
@@ -31,20 +32,21 @@ def api(request):
             log.critical("Signature mismatch, API event ignored!")
             log.critical(f"{mac.hexdigest()} vs {str(signature)}")
             devsay(f"Invalid MAC in API message: {str(signature)}", request)
+            return {'error': 'MAC verification failed!'}
     else:
         if not str(mac.hexdigest()) == str(signature):
             log.critical("Signature mismatch! API event ignored.")
             log.critical(f"{mac.hexdigest()} vs {str(signature)}")
             devsay(f"Invalid MAC in API message: {str(signature)}", request)
-
+            return {'error': 'MAC verification failed!'}
     try:
         data = request.json_body
         channel = data['channel']
         if not channel:
             log.error("No channel specified in API message, aborting.")
-            return
+            return {'error': 'No channel specified.'}
         send(channel, data['message'], "", request)
-        return {'status': 'Why do you care?'}
+        return {'status': 'Message sent'}
     except JSONDecodeError as e:
         log.exception("Well, something done fucked up, exception in body parsing/sending.")
         log.debug(f"Body: {request.body}")

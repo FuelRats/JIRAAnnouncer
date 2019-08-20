@@ -44,3 +44,4 @@ def api(request):
         send(channel, data['message'], "", request)
     except JSONDecodeError as e:
         log.exception("Well, something done fucked up, exception in body parsing/sending.")
+        log.debug(f"Body: {request.body}")

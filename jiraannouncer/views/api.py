@@ -43,7 +43,7 @@ def api(request):
         if not channel:
             log.error("No channel specified in API message, aborting.")
             return
-        send(channel, data['message'], "", request)
+        return send(channel, data['message'], "", request)
     except JSONDecodeError as e:
         log.exception("Well, something done fucked up, exception in body parsing/sending.")
         log.debug(f"Body: {request.body}")

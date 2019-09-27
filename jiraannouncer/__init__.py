@@ -6,7 +6,7 @@ def main(global_config, **settings):
     """
     config = Configurator(settings=settings)
     config.add_static_view('static', 'deform:static')
-    config.add_static_view('pyramid-static', 'pyramid:static')
+    config.add_static_view('pyramid-static', 'jiraannouncer:static')
     config.include('pyramid_jinja2')
     config.include('.models')
     config.include('.routes')

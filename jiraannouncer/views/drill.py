@@ -5,9 +5,13 @@ from deform import Form, ValidationFailure, widget
 
 
 class Drill(colander.MappingSchema):
-    clientname = colander.SchemaNode(colander.String())
+    platforms = (('PC', 'PC'), ('XB', 'XBox'), ('PS', 'PS4'))
+    client_name = colander.SchemaNode(colander.String())
     system = colander.SchemaNode(colander.String())
-    platform = colander.SchemaNode(colander.String())
+    platform = colander.SchemaNode(colander.String(),
+                                   widget=widget.RadioChoiceWidget(values=platforms),
+                                   validator=colander.OneOf(('PC', 'XB', 'PS'))
+                                   )
     overseer = colander.SchemaNode(colander.String())
 
 

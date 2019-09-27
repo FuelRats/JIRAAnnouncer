@@ -15,7 +15,7 @@ class Drill(colander.MappingSchema):
 def my_view(request):
     schema = Drill()
     drillform = Form(schema, buttons=('submit',))
-    drillform.render()
+    rendered_form = drillform.render()
     if 'submit' in request.POST:
         controls = request.POST.items()
 
@@ -30,4 +30,4 @@ def my_view(request):
 
         except:
             return
-    return dict(form=drillform)
+    return dict(form=rendered_form)

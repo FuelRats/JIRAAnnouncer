@@ -1,17 +1,26 @@
-from pyramid.response import Response
+from pyramid.httpexceptions import HTTPBadRequest
 from pyramid.view import view_config
 import colander
 from deform import Form, ValidationFailure, widget
+from ..utils import send
+import logging
+
+log = logging.getLogger(__name__)
 
 
 class Drill(colander.MappingSchema):
     platforms = (('PC', 'PC'), ('XB', 'XBox'), ('PS', 'PS4'))
+    channels = (('#drillrats', '#drillrats'), ('#drillrats2', '#drillrats2'),
+                ('#drillrats3', '#drillrats3'))
     client_name = colander.SchemaNode(colander.String())
     system = colander.SchemaNode(colander.String())
     platform = colander.SchemaNode(colander.String(),
                                    widget=widget.RadioChoiceWidget(values=platforms),
                                    validator=colander.OneOf(('PC', 'XB', 'PS'))
                                    )
+    channel = colander.SchemaNode(colander.String(),
+                                  widget=widget.RadioChoiceWidget(values=channels),
+                                  validator=colander.OneOf(('#drillrats', '#drillrats2', '#drillrats3')))
     overseer = colander.SchemaNode(colander.String())
 
 
@@ -19,19 +28,22 @@ class Drill(colander.MappingSchema):
 def my_view(request):
     schema = Drill()
     drillform = Form(schema, buttons=('submit',))
-    rendered_form = drillform.render()
     if 'submit' in request.POST:
         controls = request.POST.items()
 
         try:
             appstruct = drillform.validate(controls)
+            cmdrname = appstruct.pop("client_name", "InvalidClient")
+            system = appstruct.pop("system", "InvalidSystem")
+            platform = appstruct.pop("platform", "InvalidPlatform")
+            o2status = "OK"
+            channel = appstruct.pop("channel", "InvalidChannel")
+            message = f"Incoming Client: {cmdrname} - System: {system} - Platform: {platform} - O2: {o2status}"
+            send(channel, message, "No short for you!", request)
+
         except ValidationFailure as e:
             return {'form': e.render()}
-        return {'form': None, 'appstruct': appstruct}
+        return {'form': 'Completed!', 'appstruct': appstruct}
     else:
-        try:
-            schema = Drill()
-
-        except:
-            return
+        rendered_form = drillform.render()
     return dict(form=rendered_form)

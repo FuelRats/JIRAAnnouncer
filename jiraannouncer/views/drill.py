@@ -15,11 +15,11 @@ class Drill(colander.MappingSchema):
     client_name = colander.SchemaNode(colander.String())
     system = colander.SchemaNode(colander.String())
     platform = colander.SchemaNode(colander.String(),
-                                   widget=widget.RadioChoiceWidget(values=platforms),
+                                   widget=widget.SelectWidget(values=platforms),
                                    validator=colander.OneOf(('PC', 'XB', 'PS'))
                                    )
     channel = colander.SchemaNode(colander.String(),
-                                  widget=widget.RadioChoiceWidget(values=channels),
+                                  widget=widget.SelectWidget(values=channels),
                                   validator=colander.OneOf(('#drillrats', '#drillrats2', '#drillrats3')))
     overseer = colander.SchemaNode(colander.String())
 
@@ -38,10 +38,12 @@ def my_view(request):
             platform = appstruct.pop("platform", "InvalidPlatform")
             o2status = "OK"
             channel = appstruct.pop("channel", "InvalidChannel")
+            overseer = appstruct.pop("overseer", "InvalidSeer")
             message = f"Incoming Client: {cmdrname} - System: {system} - Platform: {platform} - O2: {o2status} - Language: English (en-US)"
             send(channel, message, "No short for you!", request)
-
+            logging.info(f"Client announcement for Overseer {overseer} made in {channel}. Client: {cmdrname}")
         except ValidationFailure as e:
+            logging.error(f"Validation failed for a call to the drill client announcer!")
             return {'form': e.render()}
         return {'form': 'Completed!', 'appstruct': appstruct}
     else:

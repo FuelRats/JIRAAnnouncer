@@ -38,7 +38,7 @@ def my_view(request):
             platform = appstruct.pop("platform", "InvalidPlatform")
             o2status = "OK"
             channel = appstruct.pop("channel", "InvalidChannel")
-            message = f"Incoming Client: {cmdrname} - System: {system} - Platform: {platform} - O2: {o2status}"
+            message = f"Incoming Client: {cmdrname} - System: {system} - Platform: {platform} - O2: {o2status} - Language: English (en-US)"
             send(channel, message, "No short for you!", request)
 
         except ValidationFailure as e:

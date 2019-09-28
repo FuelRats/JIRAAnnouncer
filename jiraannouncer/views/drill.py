@@ -13,7 +13,9 @@ class Drill(colander.MappingSchema):
     channels = (('#drillrats', '#drillrats'), ('#drillrats2', '#drillrats2'),
                 ('#drillrats3', '#drillrats3'))
     client_name = colander.SchemaNode(colander.String())
-    system = colander.SchemaNode(colander.String())
+    system = colander.SchemaNode(colander.String(),
+                                 widget=widget.AutocompleteInputWidget(
+                                     values='https://system.api.fuelrats.com/search?xhr=True'))
     platform = colander.SchemaNode(colander.String(),
                                    widget=widget.SelectWidget(values=platforms),
                                    validator=colander.OneOf(('PC', 'XB', 'PS'))

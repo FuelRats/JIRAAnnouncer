@@ -15,7 +15,7 @@ class Drill(colander.MappingSchema):
     client_name = colander.SchemaNode(colander.String())
     system = colander.SchemaNode(colander.String(),
                                  widget=widget.AutocompleteInputWidget(
-                                     values='https://system.api.fuelrats.com/search'))
+                                     values='https://system.api.fuelrats.com/search', min_length=3))
     platform = colander.SchemaNode(colander.String(),
                                    widget=widget.SelectWidget(values=platforms),
                                    validator=colander.OneOf(('PC', 'XB', 'PS'))
@@ -28,6 +28,13 @@ class Drill(colander.MappingSchema):
 
 @view_config(route_name='drill', renderer='../templates/form.jinja2')
 def my_view(request):
+    request.response.headers.update({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST,GET,DELETE,PUT,OPTIONS',
+        'Access-Control-Allow-Headers': 'Origin, Content-Type, Accept, Authorization',
+        'Access-Control-Allow-Credentials': 'true',
+        'Access-Control-Max-Age': '1728000',
+    })
     schema = Drill()
     drillform = Form(schema, buttons=('submit',))
     if 'submit' in request.POST:

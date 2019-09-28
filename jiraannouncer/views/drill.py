@@ -15,7 +15,7 @@ class Drill(colander.MappingSchema):
     client_name = colander.SchemaNode(colander.String())
     system = colander.SchemaNode(colander.String(),
                                  widget=widget.AutocompleteInputWidget(
-                                     values='https://system.api.fuelrats.com/search?xhr=True'))
+                                     values='https://system.api.fuelrats.com/search'))
     platform = colander.SchemaNode(colander.String(),
                                    widget=widget.SelectWidget(values=platforms),
                                    validator=colander.OneOf(('PC', 'XB', 'PS'))

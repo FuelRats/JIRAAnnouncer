@@ -21,6 +21,12 @@ p {
     font-weight: 300;
 }
 
+.tt-suggestion {
+    display: block;
+    padding: 3px 20px;
+    color: black;
+}
+
 .font-normal {
     font-weight: 400;
 }

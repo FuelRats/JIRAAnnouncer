@@ -49,9 +49,10 @@
             </div>
             <div class="col-md-10">
                 {% block content %}
-                    <p>No content</p>
+                    <div class="content">
+                    {{form|safe}}
+                    </div>
                 {% endblock content %}
-            </div>
         </div>
         <div class="row">
             <div class="copyright">
@@ -60,4 +61,3 @@
         </div>
     </div>
 </div>
-

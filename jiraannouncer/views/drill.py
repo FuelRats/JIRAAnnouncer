@@ -23,8 +23,8 @@ class Drill(colander.MappingSchema):
                                    validator=colander.OneOf(('PC', 'XB', 'PS')),
                                    description="Which platform the damsel is on."
                                    )
-    o2status = colander.SchemaNode(colander.String(), widget=widget.CheckboxWidget(true_val="OK",
-                                                                                   false_val="Not OK"),
+    o2status = colander.SchemaNode(colander.String(), widget=widget.CheckboxWidget(true_val="Not OK",
+                                                                                   false_val="OK"),
                                    description="Code Red cases should only be used in Dispatch drills.",
                                    title="Code Red?")
     channel = colander.SchemaNode(colander.String(),

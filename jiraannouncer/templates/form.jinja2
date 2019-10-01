@@ -1,4 +1,25 @@
 {% extends "layout.jinja2" %}
+<div class="starter-template">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-2">
+                <img class="logo img-responsive" src="{{ request.static_url('jiraannouncer:static/drillrat.jpg',
+                        _scheme='https') }}"
+                     alt="please do not toast the drillee">
+            </div>
+            <div class="col-md-10">
+                {% block content %}
+                    <p>No content</p>
+                {% endblock content %}
+            </div>
+        </div>
+        <div class="row">
+            <div class="copyright">
+                Copyright &copy; The Fuel Rats Mischief
+            </div>
+        </div>
+    </div>
+</div>
 
 {% block content %}
     <div class="content">

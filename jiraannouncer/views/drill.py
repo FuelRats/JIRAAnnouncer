@@ -12,18 +12,26 @@ class Drill(colander.MappingSchema):
     platforms = (('PC', 'PC'), ('XB', 'XBox'), ('PS', 'PS4'))
     channels = (('#drillrats', '#drillrats'), ('#drillrats2', '#drillrats2'),
                 ('#drillrats3', '#drillrats3'))
-    client_name = colander.SchemaNode(colander.String())
+    client_name = colander.SchemaNode(colander.String(),
+                                      description="Damsel's CMDR name. (NOT the Drillee's name!)")
     system = colander.SchemaNode(colander.String(),
                                  widget=widget.AutocompleteInputWidget(
-                                     values='https://system.api.fuelrats.com/search', min_length=3))
+                                     values='https://system.api.fuelrats.com/search', min_length=3),
+                                 description="Rescue system, i.e where the Damsel is located.")
     platform = colander.SchemaNode(colander.String(),
                                    widget=widget.SelectWidget(values=platforms),
-                                   validator=colander.OneOf(('PC', 'XB', 'PS'))
+                                   validator=colander.OneOf(('PC', 'XB', 'PS')),
+                                   description="Which platform the damsel is on."
                                    )
+    o2status = colander.SchemaNode(colander.String(), widget=widget.CheckboxWidget(true_val="OK",
+                                                                                   false_val="Not OK"),
+                                   description="Code Red cases should only be used in Dispatch drills.")
     channel = colander.SchemaNode(colander.String(),
                                   widget=widget.SelectWidget(values=channels),
-                                  validator=colander.OneOf(('#drillrats', '#drillrats2', '#drillrats3')))
-    overseer = colander.SchemaNode(colander.String())
+                                  validator=colander.OneOf(('#drillrats', '#drillrats2', '#drillrats3')),
+                                  description="Which channel to send the case to.")
+    overseer = colander.SchemaNode(colander.String(),
+                                   description="Who is overseeing the drill.")
 
 
 @view_config(route_name='drill', renderer='../templates/form.jinja2')
@@ -45,7 +53,7 @@ def my_view(request):
             cmdrname = appstruct.pop("client_name", "InvalidClient")
             system = appstruct.pop("system", "InvalidSystem")
             platform = appstruct.pop("platform", "InvalidPlatform")
-            o2status = "OK"
+            o2status = appstruct.pop("o2status", "OK")
             channel = appstruct.pop("channel", "InvalidChannel")
             overseer = appstruct.pop("overseer", "InvalidSeer")
             message = f"Incoming Client: {cmdrname} - System: {system} - Platform: {platform} - O2: {o2status} - Language: English (en-US)"

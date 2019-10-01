@@ -25,7 +25,8 @@ class Drill(colander.MappingSchema):
                                    )
     o2status = colander.SchemaNode(colander.String(), widget=widget.CheckboxWidget(true_val="OK",
                                                                                    false_val="Not OK"),
-                                   description="Code Red cases should only be used in Dispatch drills.")
+                                   description="Code Red cases should only be used in Dispatch drills.",
+                                   title="Code Red?")
     channel = colander.SchemaNode(colander.String(),
                                   widget=widget.SelectWidget(values=channels),
                                   validator=colander.OneOf(('#drillrats', '#drillrats2', '#drillrats3')),

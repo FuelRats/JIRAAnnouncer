@@ -54,6 +54,8 @@ def client(request):
     if system == "" | platform == "" | o2status == "":
         send("#ratchat", f"[Client Announcer] Client {cmdrname} has connected through the rescue page,"
                          f" but has not submitted system information! No automated r@tsignal sent!")
+        log.warn(f"Client {cmdrname} connected with an empty required field. System: {system}"
+                 f" Platform: {platform} o2status: {o2status}")
         return
     if 'extradata' not in request.params:
         message = f"Incoming Client: {cmdrname} - System: {system} - Platform: {platform} - O2: {o2status}"

@@ -60,6 +60,9 @@ def my_view(request):
             overseer = appstruct.pop("overseer", "InvalidSeer")
             message = f"Incoming Client: {cmdrname} - System: {system} - Platform: {platform} - O2: {o2status} - Language: English (en-US)"
             send(channel, message, "No short for you!", request)
+            if overseer.tolower() == 'xman31':
+                send(channel, "Ladies and Gentlemen, please welcome to the stage; the great Nepper himself, Grand Nep "
+                              "of Overneppers, the one and only... NEPMAN!", "Noshort", request)
             logging.info(f"Client announcement for Overseer {overseer} made in {channel}. Client: {cmdrname}")
         except ValidationFailure as e:
             logging.error(f"Validation failed for a call to the drill client announcer!")

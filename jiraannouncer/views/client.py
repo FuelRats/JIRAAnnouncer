@@ -51,7 +51,7 @@ def client(request):
     except NameError:
         log.critical("Missing parameters to Client announcement call.")
         devsay("Parameters were missing in a Client announcement call!", request)
-    if system == "" | platform == "" | o2status == "":
+    if system == "" or platform == "" or o2status == "":
         send("#ratchat", f"[Client Announcer] Client {cmdrname} has connected through the rescue page,"
                          f" but has not submitted system information! No automated r@tsignal sent!")
         log.warn(f"Client {cmdrname} connected with an empty required field. System: {system}"

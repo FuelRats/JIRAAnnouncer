@@ -37,4 +37,4 @@ class DrillOutline(colander.MappingSchema):
 
 @view_config(route_name='outliner', renderer='../templates/form.jinja2')
 def my_view(request):
-
+    return

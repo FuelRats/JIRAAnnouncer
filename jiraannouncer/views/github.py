@@ -229,6 +229,9 @@ def github(prequest):
     elif event == 'release':
         message = (f"\x0314New release\x03 \x0311{request['name']}\x03 from {request['repository']} by\x0314 "
                    f"{request['sender']} \x03(\x02\x0311{request['url']}\x03)")
+    elif event == 'label':
+        message = (f"\x0314New label\x03 \x0311{request['name']}\x03 in {request['repository']} by\x0314 "
+                   f"{request['sender']} \x03(\x02\x0311{request['url']}\x03)")
     else:
         log.debug(f"GitHub unhandled event: {event}")
         jsondump(request)

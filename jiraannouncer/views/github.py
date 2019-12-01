@@ -68,6 +68,8 @@ def github(prequest):
 
     if 'repository' in request and request['repository']['name'] in ["pipsqueak3", "limpet", "MechaChainsaw"]:
         channels = ['#mechadev']
+    elif 'repository' in request and request['repository']['name'] in ["standard-operating-procedures"]:
+        channels = ['#rat-ops']
     else:
         channels = ['#rattech']
 

@@ -42,6 +42,8 @@ def jira(request):
         channels = ["#mechadev"]
     elif "SQUAD-" in issue_key:
         channels = ["#squad"]
+    elif "API-" in issue_key:
+        return
     else:
         channels = ["#rattech"]
 

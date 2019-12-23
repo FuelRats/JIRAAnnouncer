@@ -8,7 +8,8 @@ log = logging.getLogger(__name__)
 notifyTypes = {
     'buildStarted': '\x0311Build Started\x03',
     'buildInterrupted': '\x0307\x02Build Interrupted\x03\x02',
-    'buildFinished': '\x0303Build Finished\x03'
+    'buildFinished': '\x0303Build Finished\x03',
+    'changesLoaded': '\x0311Changes Loaded\x03'
 }
 buildresults = {
     'running': '\x0308Running\x03',

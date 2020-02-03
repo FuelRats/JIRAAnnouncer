@@ -148,6 +148,9 @@ def github(prequest):
         if request['action'] == "submitted":
             log.debug("Review Submitted")
             action = request['review']['state']
+            if action == "commented":
+                log.debug("Ignoring probable duplicate comment message.")
+                return {'status': 'Message suppressed.'}
         else:
             log.debug(f"Review action: {request['action']}")
             action = request['action']

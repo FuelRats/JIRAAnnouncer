@@ -48,7 +48,7 @@ def teamcity(request):
         f"{buildresults[build['buildResult']]} (\x0315{build['buildStatusUrl']}\x03)"
     send(channel, message, '', request)
     if build['buildResultDelta'] == 'fixed':
-        message = f"\0315[\x0306TeamCity\x0315]\x03 Yay! {build['projectName']} builds fixed!"
+        message = f"\x0315[\x0306TeamCity\x0315]\x03 Yay! {build['projectName']} builds fixed!"
         send(channel, message, '', request)
     elif build['buildResultDelta'] == 'broken':
         message = f"\x0315[\x0306TeamCity\x0315]\x03 Alert! Builds for {build['projectName']}" \

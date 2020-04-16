@@ -74,6 +74,8 @@ def github(prequest):
         channels = ['#rattech']
 
     if event == 'issues':
+        if request['action'] in ['milestone', 'label']:
+            return {'ok': 'Whatever, I don\'t care...'}
         message = (f"\x0314 {request['sender']['login']} \x03{request['action']} issue #{request['issue']['number']}"
                    f": \"{request['issue']['title']}\" in \x0306{request['repository']['name']}\x03. \x02\x0311"
                    f"{request['issue']['html_url']}\x02\x03")

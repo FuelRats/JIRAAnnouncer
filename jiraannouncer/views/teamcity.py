@@ -11,6 +11,7 @@ notifyTypes = {
     'buildFinished': '\x0303Build Finished\x03',
     'changesLoaded': '\x0311Changes Loaded\x03'
 }
+
 buildresults = {
     'running': '\x0308Running\x03',
     'failure': '\x02\x0304Failure\x03\x02',

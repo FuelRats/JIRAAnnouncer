@@ -118,6 +118,8 @@ def github(prequest):
             headref = request['pull_request']['head']['ref']
         else:
             headref = request['pull_request']['head']['label']
+        if request['action'] in ['milestoned', 'labeled']:
+            return {'ok': 'Whatever, I don\'t care...'}
         if request['action'] == 'review_requested':
             message = (f"\x0314 {request['sender']['login']} \x03requested a review from\x0314 "
                        f"{', '.join(x['login'] for x in request['pull_request']['requested_reviewers'])}"

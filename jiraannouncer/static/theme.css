@@ -21,6 +21,13 @@ p {
     font-weight: 300;
 }
 
+.help-block {
+    display: block;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    color: #bf3cc7;
+}
+
 .tt-suggestion {
     display: block;
     padding: 3px 20px;

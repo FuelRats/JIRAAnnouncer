@@ -1,7 +1,6 @@
-import hmac
+import time
 
 from pyramid.view import view_config
-from sys import hexversion
 
 from ..utils import send, devsay
 import logging
@@ -26,18 +25,13 @@ def fcms(request):
     jump_time = data['calendar_end'] if 'calendar_end' in data else None
 
     if jump_time is None:
-        send(
-            "#announcerdev",
-            f"[\x0315FCMS\x03] \x02Carrier {carrier}\x02 cancelled their scheduled jump",
-            "I don't use shorts",
-            request
-        )
+        message = f"[\x0315FCMS\x03] \x02Carrier {carrier}\x02 cancelled their scheduled jump"
     else:
-        send(
-            "#announcerdev",
-            f"[\x0315FCMS\x03] \x02Carrier {carrier}\x02 is will travel from \x02{departure_system}\x02 to \x02{target_system}\x02 at \x02{jump_time}\x02",
-            "I don't use shorts",
-            request
-        )
+        message = f"[\x0315FCMS\x03] \x02Carrier {carrier}\x02 is will travel from \x02{departure_system}\x02 to \x02{target_system}\x02 at \x02{jump_time}\x02"
+
+    msgshort = {"time": time.time(), "type": "FCMS",
+                "key": "FCMS", "full": message}
+
+    send("#announcerdev", message, msgshort, request)
 
     return

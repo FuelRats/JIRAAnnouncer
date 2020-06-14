@@ -47,10 +47,10 @@ def circle(request):
         log.debug(f"Setting to data field compare: {data['compare']}")
         log.debug(f"Full dump: {data}")
     message1 = f"""
-                [\x0315CircleCI\x03] \x0306 {data['reponame'] or ''}/{data['reponame'] or ''}
+                [\x0315CircleCI\x03] \x0306 {data['username'] or ''}/{data['reponame'] or ''}
                  \x03#{data['build_num'] or ''} (\x0306{data['branch'] or ''}\x03 -  
                  {data['vcs_revision'][:7] or ''} : \x0314 {data['user']['login'] or ''}
-                 \x03: {data['outcome'] or ''}
+                 \x03: {data['outcome'] or ''})
                 """
     message2 = f"""
                 [\x0315CircleCI\x03] Change view: \x02\x0311{compareurl or data['compare']}

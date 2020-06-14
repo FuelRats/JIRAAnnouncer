@@ -23,7 +23,7 @@ def fcms(request):
     carrier_name = from_hex(data['carrier_vanity_name'])
     target_system = data['calendar_arrivalSystem']
     departure_system = data['current_starsystem']
-    jump_time = data['calendar_end'] if 'calendar_end' in data else None
+    jump_time = data['calendar_start']
 
     if jump_time is None:
         message = f"[\x0315FCMS\x03] \x02{carrier_name} ({carrier})\x02 cancelled their scheduled jump"

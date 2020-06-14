@@ -13,3 +13,4 @@ def includeme(config):
     config.add_route('api', '/api')
     config.add_route('drill', '/drill')
     config.add_route('outliner', '/outliner')
+    config.add_route('fcms', '/fcms')

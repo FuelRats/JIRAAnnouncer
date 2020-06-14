@@ -28,14 +28,14 @@ def fcms(request):
     if jump_time is None:
         send(
             "#announcerdev",
-            f"[FCMS] Carrier {carrier} cancelled their scheduled jump",
+            f"[\x0315FCMS\x03] \x02Carrier {carrier}\x02 cancelled their scheduled jump",
             "I don't use shorts",
             request
         )
     else:
         send(
             "#announcerdev",
-            f"[FCMS] Carrier {carrier} is will travel from {departure_system} to {target_system} at {jump_time}",
+            f"[\x0315FCMS\x03] \x02Carrier {carrier}\x02 is will travel from \x02{departure_system}\x02 to \x02{target_system}\x02 at \x02{jump_time}\x02",
             "I don't use shorts",
             request
         )

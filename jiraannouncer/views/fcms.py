@@ -21,9 +21,13 @@ def fcms(request):
 
     carrier = data['carrier_callsign']
     carrier_name = from_hex(data['carrier_vanity_name'])
-    target_system = data['calendar_arrivalSystem']
-    departure_system = data['current_starsystem']
+    target_system = data['calendar_arrivalSystem'] if 'calendar_arrivalSystem' in data else None
+    departure_system = data['current_starsystem'] if 'current_starsystem' in data else None
     jump_time = data['calendar_start']
+
+    if target_system is None and departure_system is None
+        log.info('Ignored FCMS webhook event')
+        return
 
     if jump_time is None:
         message = f"[\x0315FCMS\x03] \x02{carrier_name} ({carrier})\x02 cancelled their scheduled jump"

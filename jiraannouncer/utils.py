@@ -19,6 +19,16 @@ log = logging.getLogger(__name__)
 registry = threadlocal.get_current_registry()
 
 
+def from_hex(mystr):
+    print(mystr)
+    try:
+        return bytes.fromhex(mystr).decode('utf-8')
+    except TypeError:
+        return "Unregistered Carrier"
+    except ValueError:
+        return "Unregistered Carrier"
+
+
 def logprint(string):
     """Convert input to string, and print to log, ignoring non-ascii characters."""
     logging.debug(str(string).encode('ascii', 'ignore').decode())
@@ -52,10 +62,12 @@ def send(channel, message, msgshort, request):
     print(f"Proxy: {serverurl}")
     proxy = ServerProxy(serverurl)
     try:
-        messagesplit = [message[i:i + 475] for i in range(0, len(message), 475)]
+        messagesplit = [message[i:i + 475]
+                        for i in range(0, len(message), 475)]
         for msgpart in messagesplit:
             log.debug(f"Sending to {channel}...")
-            log.debug(proxy.command("botserv", "ABish", f"say {channel} {msgpart}"))
+            log.debug(proxy.command("botserv", "ABish",
+                                    f"say {channel} {msgpart}"))
             time.sleep(0.5)
         pickle.dump(msgshort, open("lastmessage.p", "wb"))
     except Error as err:

@@ -21,8 +21,15 @@ def mystripe(request):
     if event.type == 'payment_intent.succeeded':
         payment_intent = event.data.object
         decimalplace = len(str(payment_intent.amount))-2  # Fucking Stripe.
+        amount = float(f'{str(payment_intent.amount)[:decimalplace]}.{str(payment_intent.amount)[decimalplace:]}')
+        if payment_intent.currency=='usd':
+            numsnickers = str(round(amount / 1.48))
+        elif  payment_intent.currency == 'eur':
+            numsnickers = str(round(amount / 1.25))
+        else:
+            numsnickers = 'an unknown amount of'
+        print(f'[\x0315Stripe\x03] A donation of \x0315{str(amount)}\x03 {payment_intent.currency.upper()} '
+             f'was made. This equals about {numsnickers} snickers!')
         send(f'#{request.registry.settings["stripe_channel"]}',
-             f'[\x0315Stripe\x03] A donation of \x0315{str(payment_intent.amount)[:decimalplace]}.'
-             f'{str(payment_intent.amount)[decimalplace:]}\x03 {payment_intent.currency.upper()} '
-             f'was made.',
-             'No!', request)
+             f'[\x0315Stripe\x03] A donation of \x0315{str(amount)}\x03 {payment_intent.currency.upper()} '
+             f'was made. This equals about {numsnickers} snickers!', 'No!', request)

@@ -25,7 +25,7 @@ def fcms(request):
     departure_system = data['current_starsystem'] if 'current_starsystem' in data else None
     jump_time = data['calendar_start']
 
-    if target_system is None and departure_system is None
+    if target_system is None and departure_system is None:
         log.info('Ignored FCMS webhook event')
         return
 

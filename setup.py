@@ -21,7 +21,9 @@ requires = [
     'simplejson',
     'zope',
     'graypy',
-    'wheel', 'colander', 'deform'
+    'stripe',
+    'wheel', 'colander', 'deform',
+    'zope_sqlalchemy',
 ]
 
 tests_require = [

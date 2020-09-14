@@ -20,5 +20,7 @@ def mystripe(request):
         return HTTPError(detail='Invalid payload')
     if event.type == 'payment_intent.succeeded':
         payment_intent = event.data.object
-        send('#announcerdev', f'[\x0315Stripe\x03] A donation of {payment_intent.amount} {payment_intent.currency} was made.',
+        decimalplace = len(str(payment_intent.amount))-2  # Fucking Stripe.
+        send('#announcerdev', f'[\x0315Stripe\x03] A donation of {str(payment_intent.amount)[:decimalplace]}.'
+                              f'{str(payment_intent.amount)[decimalplace:]} {payment_intent.currency} was made.',
              'No!', request)

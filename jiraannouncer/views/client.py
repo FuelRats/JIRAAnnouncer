@@ -38,9 +38,19 @@ def client(request):
                 possiblefake = True
     elif referer != "https://clients.fuelrats.com:7778/":
         log.error(f"Client announcer called with invalid referer: {referer}")
-        devsay(f"Someone tried to call the client announcer with an invalid referer '{referer}'! Absolver!",
-               request)
-        possiblefake = True
+        browser = request.user_agent
+        if 'iPhone' in browser:
+            # Client is using an iPhone/iPad that does not forward referrer.
+            send('#ratchat', f"[Client Announcer] Warning! The incoming client is using a phone or tablet device that"
+                             f"does not preserve connections if switching apps/sleeping!", "", request)
+        elif 'PlayStation 4' in browser or 'PLAYSTATION' in browser:
+            send('#ratchat', f"[Client Announcer] Warning! The incoming client is using a known BROKEN browser that"
+                             f" will not let them send to chat channels!", "", request)
+        else:
+            possiblefake = True
+            devsay(f"Someone tried to call the client announcer with an invalid referer '{referer}'! Absolver!",
+                   request)
+
     else:
         log.warn("Non-signed request from valid referer.")
     try:

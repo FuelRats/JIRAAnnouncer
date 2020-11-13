@@ -60,8 +60,8 @@ def discourse(prequest):
         return {'error': 'Not a valid JSON payload!'}
     domessage = True
 
-    if prequest.headers['HTTP_X_DISCOURSE_EVENT'] != 'post_created':
-        log.warning('Skipped non post created event from Discourse: '+prequest.headers['HTTP_X_DISCOURSE_EVENT'])
+    if prequest.headers['X_DISCOURSE_EVENT'] != 'post_created':
+        log.warning('Skipped non post created event from Discourse: '+prequest.headers['X_DISCOURSE_EVENT'])
     else:
         print(request['post_type'])
         message = (f"New post by \x0314 {request['username']} in [\x0314{request['category_slug']}\x03]" 

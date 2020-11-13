@@ -265,3 +265,4 @@ def github(prequest):
                 return {'status': 'Go away, Dependabot.'}
             for channel in channels:
                 send(channel, f"[\x0315GitHub\x03] {message}", msgshort, prequest)
+            return {}

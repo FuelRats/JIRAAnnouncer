@@ -15,3 +15,4 @@ def includeme(config):
     config.add_route('outliner', '/outliner')
     config.add_route('stripe', '/stripe')
     config.add_route('fcms', '/fcms')
+    config.add_route('discourse', '/discourse')

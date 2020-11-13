@@ -63,11 +63,11 @@ def discourse(prequest):
     if prequest.headers['X_DISCOURSE_EVENT'] != 'post_created':
         log.warning('Skipped non post created event from Discourse: '+prequest.headers['X_DISCOURSE_EVENT'])
     else:
-        print(request['post']['post_type'])
-        message = (f"New post by \x0314 {request['post']['username']} in [\x0314{request['post']['category_slug']}\x03]" 
-                   f" '{request['post']['topic_title']}'. "
+        # TODO: Add channel directing for categories.
+        message = (f"New post by \x0314{request['post']['username']}\x03 in [\x0314{request['post']['category_slug']}\x03]" 
+                   f" '\x0303{request['post']['topic_title']}\x03' ("
                    f"https://discourse.fuelrats.com/t/{request['post']['topic_slug']}/"
-                   f"{request['post']['topic_id']}/{request['post']['post_number']}")
+                   f"{request['post']['topic_id']}/{request['post']['post_number']})")
         msgshort = {"time": time.time(), "type": "post", "key": "Discourse", "full": message}
-        send('#rattech', f"[\x0312Discourse\x03] {message}", msgshort, prequest)
+        send('#rattech', f"[\x0313Discourse\x03] {message}", msgshort, prequest)
     return {}

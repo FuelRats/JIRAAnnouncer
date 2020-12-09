@@ -47,19 +47,22 @@ def statuspage(request):
     status_prefix = prefixOptions[data['page']['status_indicator']]
     status_suffix = suffixOptions[data['page']['status_indicator']]
     status_name = f"{status_prefix}{data['page']['status_description']}{status_suffix}"
-    if 'incident' in data:
-        shortlink = data['incident']['shortlink']
-        message = (f"[{data['incident']['name'] or ''}] {data['incident']['incident_updates'][0]['body'][:64]}..."
-                   f"{statusOptions[data['incident']['status']]} {data['incident']['scheduled_for'] or ''}"
-                   f"{'-' if data['incident']['scheduled_for'] is not None else ''}"
-                   f"{data['incident']['scheduled_until'] or ''}"
-                   )
-    elif data['component_update'] is not None:
-        message = (f"[Component: {data['component']['name']}] went from "
-                   f"{componentOptions[data['component_update']['old_status']] or ''} to "
-                   f"{componentOptions[data['component_update']['new_status']] or ''}"
-                   )
-    else:
-        message = "Something went horribly wrong in Statuspage processing."
-    send("#ratchat", f"{status_name} {message} {shortlink or ''}", "No shorts today.", request)
+    try:
+        if 'incident' in data:
+            shortlink = data['incident']['shortlink']
+            message = (f"[{data['incident']['name'] or ''}] {data['incident']['incident_updates'][0]['body'][:64]}..."
+                       f"{statusOptions[data['incident']['status']]} {data['incident']['scheduled_for'] or ''}"
+                       f"{'-' if data['incident']['scheduled_for'] is not None else ''}"
+                       f"{data['incident']['scheduled_until'] or ''}"
+                       )
+        elif data['component_update'] is not None:
+            message = (f"[Component: {data['component']['name']}] went from "
+                       f"{componentOptions[data['component_update']['old_status']] or ''} to "
+                       f"{componentOptions[data['component_update']['new_status']] or ''}"
+                       )
+        else:
+            message = "Something went horribly wrong in Statuspage processing."
+        send("#ratchat", f"{status_name} {message} {shortlink or ''}", "No shorts today.", request)
+    except KeyError as e:
+        log.error(f"Error: {e}. Dumping JSON: {data}")
     return

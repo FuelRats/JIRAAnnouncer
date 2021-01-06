@@ -44,6 +44,8 @@ def jira(request):
         channels = ["#squad"]
     elif "TMGMT-" in issue_key:
         channels = ["#operations"]
+    elif "QMS-" in issue_key:
+        channels = ['#popcorn', '#rattech']
     else:
         channels = ["#rattech"]
 

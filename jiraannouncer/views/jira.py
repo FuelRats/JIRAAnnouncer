@@ -45,7 +45,7 @@ def jira(request):
     elif "TMGMT-" in issue_key:
         channels = ["#operations"]
     elif "QMS-" in issue_key:
-        channels = ['#popcorn', '#rattech']
+        channels = ['#absdev', '#rattech']
     else:
         channels = ["#rattech"]
 
@@ -161,7 +161,7 @@ def jira(request):
         message = (f"Project deleted: \x02\x0307{data['project']['name']}\x02\x03 [\x02x0308"
                    f"{data['project']['key']}\x03\x02] under \x02\x0314{data['project']['projectLead']['key']}"
                    f" ({data['project']['projectLead']['displayName']})")
-    elif request_type == 'comment_created':
+    elif request_type in ['comment_created', 'comment_updated']:
         message = None  # Not sure we actually want spam every time a comment is made.
         domessage = False
     else:

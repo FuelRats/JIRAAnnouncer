@@ -67,6 +67,10 @@ def client(request):
         log.warn(f"Client {cmdrname} connected with an empty required field. System: {system}"
                  f" Platform: {platform} o2status: {o2status}")
         return
+    if system.lower() in ["sabiyhan"]:
+        send("#ratchat", f"[Client Announcer] ALERT! Arriving client {cmdrname} submitted a system name known"
+                         f" to cause a game client crash. Proceed with caution!")
+        log.warn(f"Client {cmdrname} used blocked system name {system} in an attempt to crash game clients.")
     if 'extradata' not in request.params:
         message = f"Incoming Client: {cmdrname} - System: {system} - Platform: {platform} - O2: {o2status}"
     else:

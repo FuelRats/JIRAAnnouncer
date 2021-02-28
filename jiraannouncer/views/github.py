@@ -70,7 +70,7 @@ def github(prequest):
         channels = ['#mechadev']
     elif 'repository' in request and request['repository']['name'] in ["standard-operating-procedures"]:
         channels = ['#rat-ops']
-    elif 'repository' in request and request['repository']['name'] in ["QMS"]:
+    elif 'repository' in request and request['repository']['name'] in ["QMS", "fuelrats.com"]:
         channels = ['#rattech', '#absdev']
     else:
         channels = ['#rattech']

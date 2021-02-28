@@ -46,6 +46,8 @@ def jira(request):
         channels = ["#operations"]
     elif "QMS-" in issue_key:
         channels = ['#absdev', '#rattech']
+    elif "WEB-" in issue_key:
+        channels = ['#bbsdev', '#rattech']
     else:
         channels = ["#rattech"]
 

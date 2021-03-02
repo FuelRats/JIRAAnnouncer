@@ -1,5 +1,6 @@
 import hmac
 
+import requests
 from pyramid.view import view_config
 from sys import hexversion
 
@@ -18,6 +19,8 @@ def client(request):
     if 'X-Client-Signature' in request.headers:
         settings = request.registry.settings
         client_secret = settings['client_secret'] if 'client_secret' in settings else None
+        fr_token = settings['fr_token'] if 'fr_token' in settings else None
+        api_url = settings['fr_url'] if 'fr_url' in settings else None
         header_signature = request.headers['X-Client-Signature']
         log.debug("HMAC signature was passed by referrer.")
         sha_name, signature = header_signature.split('=')
@@ -76,10 +79,26 @@ def client(request):
     else:
         extradata = request.params['extradata']
         message = f"Incoming Client: {cmdrname} - System: {system} - Platform: {platform} - O2: {o2status} - {extradata}"
-
-    send("#fuelrats", message, "No Short for you!", request)
-    if possiblefake:
-        send("#ratchat",
-             f"[Client Announcer] Warning! The arriving case is not passing validation information!",
-             "", request)
+    rescues = requests.get(f'{api_url}/rescues?filter[status]=open', headers={'Accept': 'application/json',
+                                                                               'Authorization':
+                                                                                   f'Bearer:{fr_token}'}).json()
+    active_cases = []
+    try:
+        for rescue in rescues['data']:
+            active_cases.append(rescue['attributes']['clientNick'])
+        if cmdrname in active_cases:
+            log.warn(f"Suppressing active case announcement for client {cmdrname}")
+        else:
+            send("#fuelrats", message, "No Short for you!", request)
+            if possiblefake:
+                send("#ratchat",
+                     f"[Client Announcer] Warning! The arriving case is not passing validation information!",
+                     "", request)
+    except:
+        print("Failed to parse rescue data, not attempting to suppress repeat cases.")
+        send("#fuelrats", message, "No Short for you!", request)
+        if possiblefake:
+            send("#ratchat",
+                 f"[Client Announcer] Warning! The arriving case is not passing validation information!",
+                 "", request)
     return

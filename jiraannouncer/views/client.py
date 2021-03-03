@@ -81,7 +81,7 @@ def client(request):
         message = f"Incoming Client: {cmdrname} - System: {system} - Platform: {platform} - O2: {o2status} - {extradata}"
     rescues = requests.get(f'{api_url}/rescues?filter[status]=open', headers={'Accept': 'application/json',
                                                                                'Authorization':
-                                                                                   f'Bearer:{fr_token}'}).json()
+                                                                                   f'Bearer {fr_token}'}).json()
     active_cases = []
     try:
         for rescue in rescues['data']:

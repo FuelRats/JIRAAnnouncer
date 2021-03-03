@@ -15,12 +15,12 @@ def client(request):
     """Handle Client arrival announcements."""
     referer = request.headers['Referer'] if 'referer' in request.headers else None
     possiblefake = False
+    settings = request.registry.settings
+    fr_token = settings['fr_token'] if 'fr_token' in settings else None
+    api_url = settings['fr_url'] if 'fr_url' in settings else None
 
     if 'X-Client-Signature' in request.headers:
-        settings = request.registry.settings
         client_secret = settings['client_secret'] if 'client_secret' in settings else None
-        fr_token = settings['fr_token'] if 'fr_token' in settings else None
-        api_url = settings['fr_url'] if 'fr_url' in settings else None
         header_signature = request.headers['X-Client-Signature']
         log.debug("HMAC signature was passed by referrer.")
         sha_name, signature = header_signature.split('=')

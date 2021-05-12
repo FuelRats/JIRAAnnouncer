@@ -55,30 +55,37 @@ def client(request):
                    request)
 
     else:
-        log.warn("Non-signed request from valid referer.")
+        log.warning("Non-signed request from valid referer.")
     try:
         cmdrname = request.params['cmdrname']
         system = request.params['system']
         platform = request.params['platform']
         o2status = request.params['EO2']
+        if 'odyssey' in request.params:
+            # Shit gonna get wild!
+            odyssey = request.params['odyssey']
+        else:
+            odyssey = False
     except NameError:
         log.critical("Missing parameters to Client announcement call.")
         devsay("Parameters were missing in a Client announcement call!", request)
     if system == "" or platform == "" or o2status == "":
         send("#ratchat", f"[Client Announcer] Client {cmdrname} has connected through the rescue page,"
                          f" but has not submitted system information! No automated r@tsignal sent!")
-        log.warn(f"Client {cmdrname} connected with an empty required field. System: {system}"
+        log.warning(f"Client {cmdrname} connected with an empty required field. System: {system}"
                  f" Platform: {platform} o2status: {o2status}")
         return
     if system.lower() in ["sabiyhan"]:
         send("#ratchat", f"[Client Announcer] ALERT! Arriving client {cmdrname} submitted a system name known"
                          f" to cause a game client crash. Proceed with caution!")
-        log.warn(f"Client {cmdrname} used blocked system name {system} in an attempt to crash game clients.")
+        log.warning(f"Client {cmdrname} used blocked system name {system} in an attempt to crash game clients.")
     if 'extradata' not in request.params:
-        message = f"Incoming Client: {cmdrname} - System: {system} - Platform: {platform} - O2: {o2status}"
+            message = f"Incoming Client: {cmdrname} - System: {system} - Platform: {platform} " \
+                      f"{'(Odyssey)' if odyssey else ''} - O2: {o2status}"
     else:
         extradata = request.params['extradata']
-        message = f"Incoming Client: {cmdrname} - System: {system} - Platform: {platform} - O2: {o2status} - {extradata}"
+        message = f"Incoming Client: {cmdrname} - System: {system} - Platform: {platform} " \
+                  f"{'(Odyssey)' if odyssey else ''}- O2: {o2status} - {extradata}"
     rescues = requests.get(f'{api_url}/rescues?filter[status]=open', headers={'Accept': 'application/json',
                                                                                'Authorization':
                                                                                    f'Bearer {fr_token}'}).json()
@@ -87,7 +94,7 @@ def client(request):
         for rescue in rescues['data']:
             active_cases.append(rescue['attributes']['clientNick'])
         if cmdrname in active_cases:
-            log.warn(f"Suppressing active case announcement for client {cmdrname}")
+            log.warning(f"Suppressing active case announcement for client {cmdrname}")
         else:
             send("#fuelrats", message, "No Short for you!", request)
             if possiblefake:

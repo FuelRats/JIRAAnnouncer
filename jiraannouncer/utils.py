@@ -58,7 +58,7 @@ def demarkdown(string):
 def send(channel, message, msgshort, request):
     """Send resulting message to IRC over XMLRPC."""
     message = message.replace('\n', ' ').replace('\r', '')
-    if 'dev' in request.host:
+    if '.dev' in request.host:
         serverurl = request.registry.settings['xml_devproxy']
     else:
         serverurl = request.registry.settings['xml_proxy']

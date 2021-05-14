@@ -85,7 +85,7 @@ def client(request):
     else:
         extradata = request.params['extradata']
         message = f"Incoming Client: {cmdrname} - System: {system} - Platform: {platform} " \
-                  f"{'(Odyssey)' if odyssey else ''}- O2: {o2status} - {extradata}"
+                  f"{'(Odyssey)' if odyssey else ''} - O2: {o2status} - {extradata}"
     rescues = requests.get(f'{api_url}/rescues?filter[status]=open', headers={'Accept': 'application/json',
                                                                                'Authorization':
                                                                                    f'Bearer {fr_token}'}).json()

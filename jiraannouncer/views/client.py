@@ -63,7 +63,7 @@ def client(request):
         o2status = request.params['EO2']
         if 'odyssey' in request.params:
             # Shit gonna get wild!
-            odyssey = request.params['odyssey']
+            odyssey = True if request.params['odyssey'].lower() == "true" else False
         else:
             odyssey = False
     except NameError:

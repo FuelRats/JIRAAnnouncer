@@ -39,7 +39,7 @@ def client(request):
                 log.error(f"{mac.hexdigest()} vs {str(signature)}")
                 devsay(f"Invalid MAC in Client message: {str(signature)}", request)
                 possiblefake = True
-    elif referer != "https://clients.fuelrats.com:7778/":
+    elif referer not in ["https://clients.fuelrats.com:7777/", "https://clients.fuelrats.com/"]:
         log.error(f"Client announcer called with invalid referer: {referer}")
         browser = request.user_agent
         if 'iPhone' in browser or 'Android' in browser:

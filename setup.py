@@ -24,6 +24,7 @@ requires = [
     'stripe',
     'wheel', 'colander', 'deform',
     'zope_sqlalchemy',
+    'requests',
 ]
 
 tests_require = [

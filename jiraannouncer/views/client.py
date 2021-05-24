@@ -19,6 +19,20 @@ def client(request):
     fr_token = settings['fr_token'] if 'fr_token' in settings else None
     api_url = settings['fr_url'] if 'fr_url' in settings else None
 
+    try:
+        cmdrname = request.params['cmdrname']
+        system = request.params['system']
+        platform = request.params['platform']
+        o2status = request.params['EO2']
+        if 'odyssey' in request.params:
+            # Shit gonna get wild!
+            odyssey = True if request.params['odyssey'].lower() == "true" else False
+        else:
+            odyssey = False
+    except NameError:
+        log.critical("Missing parameters to Client announcement call.")
+        devsay("Parameters were missing in a Client announcement call!", request)
+
     if 'X-Client-Signature' in request.headers:
         client_secret = settings['client_secret'] if 'client_secret' in settings else None
         header_signature = request.headers['X-Client-Signature']
@@ -44,10 +58,10 @@ def client(request):
         browser = request.user_agent
         if 'iPhone' in browser or 'Android' in browser:
             # Client is using an iPhone/iPad that does not forward referrer.
-            send('#ratchat', f"[Client Announcer] Warning! The incoming client is using a phone or tablet device that"
+            send('#ratchat', f"[Client Announcer] Warning! Client {cmdrname} is using a phone or tablet device that"
                              f" does not preserve connections if switching apps/sleeping!", "", request)
         elif 'PlayStation 4' in browser or 'PLAYSTATION' in browser:
-            send('#ratchat', f"[Client Announcer] Warning! The incoming client is using a known BROKEN browser that"
+            send('#ratchat', f"[Client Announcer] Warning! Client {cmdrname} is using a known BROKEN browser that"
                              f" will not let them send to chat channels!", "", request)
         else:
             possiblefake = True
@@ -56,19 +70,6 @@ def client(request):
 
     else:
         log.warning("Non-signed request from valid referer.")
-    try:
-        cmdrname = request.params['cmdrname']
-        system = request.params['system']
-        platform = request.params['platform']
-        o2status = request.params['EO2']
-        if 'odyssey' in request.params:
-            # Shit gonna get wild!
-            odyssey = True if request.params['odyssey'].lower() == "true" else False
-        else:
-            odyssey = False
-    except NameError:
-        log.critical("Missing parameters to Client announcement call.")
-        devsay("Parameters were missing in a Client announcement call!", request)
     if system == "" or platform == "" or o2status == "":
         send("#ratchat", f"[Client Announcer] Client {cmdrname} has connected through the rescue page,"
                          f" but has not submitted system information! No automated r@tsignal sent!")

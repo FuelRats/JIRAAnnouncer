@@ -38,7 +38,7 @@ def jira(request):
         channels = ["#doersofstuff"]
     elif "OPS-" in issue_key:
         channels = ["#rat-ops"]
-    elif "SPARK-" in issue_key or "MECHA-" in issue_key:
+    elif "SPARK-" in issue_key in issue_key:
         channels = ["#mechadev"]
     elif "SQUAD-" in issue_key:
         channels = ["#squad"]

@@ -34,8 +34,10 @@ def jira(request):
     else:
         issue_key = "JIRA"
 
-    if "TRAIN-" in issue_key or "OV-" in issue_key or "DRR-" in issue_key or "DOS-" in issue_key or "CID-" in issue_key:
+    if "OV-" in issue_key or "DRR-" in issue_key or "DOS-" in issue_key or "CID-" in issue_key:
         channels = ["#doersofstuff"]
+    elif "TRAIN-" in issue_key:
+        channels = ["#trainers"]
     elif "OPS-" in issue_key:
         channels = ["#rat-ops"]
     elif "SPARK-" in issue_key or "MECHA-" in issue_key:

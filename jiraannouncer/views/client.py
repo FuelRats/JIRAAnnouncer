@@ -78,11 +78,11 @@ def client(request):
         log.warning(f"Client {cmdrname} used blocked system name {system} in an attempt to crash game clients.")
     if 'extradata' not in request.params:
             message = f"Incoming Client: {cmdrname} - System: {system} - Platform: {platform} " \
-                      f"{odyssey if platform == "PC" else ''} - O2: {o2status}"
+                      f"{odyssey if platform == 'PC' else ''} - O2: {o2status}"
     else:
         extradata = request.params['extradata']
         message = f"Incoming Client: {cmdrname} - System: {system} - Platform: {platform} " \
-                  f"{odyssey if platform == "PC" else ''} - O2: {o2status} - {extradata}"
+                  f"{odyssey if platform == 'PC' else ''} - O2: {o2status} - {extradata}"
     rescues = requests.get(f'{api_url}/rescues?filter[status]=open', headers={'Accept': 'application/json',
                                                                                'Authorization':
                                                                                    f'Bearer {fr_token}'}).json()

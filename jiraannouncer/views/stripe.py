@@ -22,6 +22,12 @@ def mystripe(request):
         payment_intent = event.data.object
         decimalplace = len(str(payment_intent.amount))-2  # Fucking Stripe.
         amount = float(f'{str(payment_intent.amount)[:decimalplace]}.{str(payment_intent.amount)[decimalplace:]}')
+        // If id_cart is set, we're dealing with a store purchase. If not, it's a donation.
+        if payment_intent.metadata.get('id_cart'):
+            send(f'#{request.registry.settings["stripe_channel"]}',
+                 f"Payment of {amount} {payment_intent.currency.upper()} received for cart "
+                 f"{payment_intent.metadata.get('id_cart')}.")
+        else:
         if payment_intent.currency=='usd':
             numsnickers = str(round(amount / 1.48))
         elif payment_intent.currency == 'eur':

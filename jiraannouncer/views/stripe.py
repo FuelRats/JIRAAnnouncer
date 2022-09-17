@@ -32,10 +32,22 @@ def mystripe(request):
             numsnickers = str(round(amount / 1.25))
         elif payment_intent.currency == 'gbp':
             numsnickers = str(round(amount / 0.65))
+        elif payment_intent.currency == 'cad':
+            numsnickers = str(round(amount / 1.11))
+        elif payment_intent.currency == 'aud':
+            numsnickers = str(round(amount / 0.99))
+        elif payment_intent.currency == 'nzd':
+            numsnickers = str(round(amount / 0.88))
         else:
             numsnickers = 'an unknown amount of'
-        print(f'[\x0315Stripe\x03] A {ptype} of \x0315{str(amount)}\x03 {payment_intent.currency.upper()} '
+            
+        currency = payment_intent.currency
+        if currency = 'aud':
+            currency = 'dollary-doos'
+            
+            
+        print(f'[\x0315Stripe\x03] A {ptype} of \x0315{str(amount)}\x03 {currency.upper()} '
              f'was made. This equals about {numsnickers} snickers!')
         send(f'#{request.registry.settings["stripe_channel"]}',
-             f'[\x0315Stripe\x03] A {ptype} of \x0315{str(amount)}\x03 {payment_intent.currency.upper()} '
+             f'[\x0315Stripe\x03] A {ptype} of \x0315{str(amount)}\x03 {currency.upper()} '
              f'was made. This equals about {numsnickers} snickers!', 'No!', request)

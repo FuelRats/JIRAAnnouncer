@@ -24,11 +24,7 @@ def client(request):
         system = request.params['system']
         platform = request.params['platform']
         o2status = request.params['EO2']
-        if 'odyssey' in request.params:
-            # Shit gonna get wild!
-            odyssey = True if request.params['odyssey'].lower() == "true" else False
-        else:
-            odyssey = False
+        odyssey = request.params['odyssey']
     except NameError:
         log.critical("Missing parameters to Client announcement call.")
         devsay("Parameters were missing in a Client announcement call!", request)
@@ -82,11 +78,11 @@ def client(request):
         log.warning(f"Client {cmdrname} used blocked system name {system} in an attempt to crash game clients.")
     if 'extradata' not in request.params:
             message = f"Incoming Client: {cmdrname} - System: {system} - Platform: {platform} " \
-                      f"{'(Odyssey)' if odyssey else ''} - O2: {o2status}"
+                      f"{odyssey if platform == 'PC' else ''} - O2: {o2status}"
     else:
         extradata = request.params['extradata']
         message = f"Incoming Client: {cmdrname} - System: {system} - Platform: {platform} " \
-                  f"{'(Odyssey)' if odyssey else ''} - O2: {o2status} - {extradata}"
+                  f"{odyssey if platform == 'PC' else ''} - O2: {o2status} - {extradata}"
     rescues = requests.get(f'{api_url}/rescues?filter[status]=open', headers={'Accept': 'application/json',
                                                                                'Authorization':
                                                                                    f'Bearer {fr_token}'}).json()

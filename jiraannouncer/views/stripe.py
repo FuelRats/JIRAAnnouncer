@@ -42,7 +42,7 @@ def mystripe(request):
             numsnickers = 'an unknown amount of'
             
         currency = payment_intent.currency
-        if currency = 'aud':
+        if currency == 'aud':
             currency = 'dollary-doos'
             
             

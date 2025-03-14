@@ -19,11 +19,9 @@ requires = [
     'waitress',
     'pyramid_scheduler',
     'simplejson',
-    'zope',
     'graypy',
     'stripe',
     'wheel', 'colander', 'deform',
-    'zope_sqlalchemy',
     'requests',
 ]
 

@@ -26,18 +26,19 @@ def mystripe(request):
             ptype="store purchase"
         else:
             ptype="donation"
+        usd_amount = amount / 1.57
         if payment_intent.currency=='usd':
-            numsnickers = str(round(amount / 1.48))
+            numsnickers = str(round(usd_amount))
         elif payment_intent.currency == 'eur':
-            numsnickers = str(round(amount / 1.25))
+            numsnickers = str(round(usd_amount / 0.92))
         elif payment_intent.currency == 'gbp':
-            numsnickers = str(round(amount / 0.65))
+            numsnickers = str(round(usd_amount / 0.77))
         elif payment_intent.currency == 'cad':
-            numsnickers = str(round(amount / 1.11))
+            numsnickers = str(round(usd_amount / 1.44))
         elif payment_intent.currency == 'aud':
-            numsnickers = str(round(amount / 0.99))
+            numsnickers = str(round(usd_amount / 1.58))
         elif payment_intent.currency == 'nzd':
-            numsnickers = str(round(amount / 0.88))
+            numsnickers = str(round(usd_amount / 1.75))
         else:
             numsnickers = 'an unknown amount of'
             

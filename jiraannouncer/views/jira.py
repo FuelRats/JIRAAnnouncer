@@ -44,7 +44,7 @@ def jira(request):
         channels = ["#mechadev"]
     elif "SQUAD-" in issue_key:
         channels = ["#squad"]
-    elif "TMGMT-" in issue_key or "ADM-" in issue_key or "OVPR-" in issue_key:
+    elif "TMGMT-" in issue_key or "ADM-" in issue_key or "OVPR-" in issue_key or "FRKB-" in issue_key:
         channels = ["#operations"]
     elif "QMS-" in issue_key:
         channels = ['#absdev', '#rattech']

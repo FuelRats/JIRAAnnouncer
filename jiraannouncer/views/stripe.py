@@ -77,7 +77,7 @@ def mystripe(request):
             month = get_current_month()
             totals[month] = totals.get(month, 0.0) + usd_value
             save_donation_totals(totals)
-            percent = min(100, (totals[month] / MONTHLY_GOAL) * 100)
+            percent = (totals[month] / MONTHLY_GOAL) * 100
             percent_str = f"Donation goal: {percent:.1f}% of ${MONTHLY_GOAL:.0f} reached this month!"
         else:
             percent_str = None

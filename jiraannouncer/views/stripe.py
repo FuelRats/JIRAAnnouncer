@@ -40,7 +40,8 @@ def mystripe(request):
         payment_intent = event.data.object
         decimalplace = len(str(payment_intent.amount))-2
         amount = float(f'{str(payment_intent.amount)[:decimalplace]}.{str(payment_intent.amount)[decimalplace:]}')
-        if payment_intent.metadata.get('id_cart'):
+        metadata = getattr(payment_intent, 'metadata', None)
+        if metadata is not None and getattr(metadata, 'id_cart', None):
             ptype = "store purchase"
         else:
             ptype = "donation"

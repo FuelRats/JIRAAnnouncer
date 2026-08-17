@@ -1,10 +1,11 @@
+import base64
 import logging
 import graypy
 import pickle
 import re
 import sys
 import time
-from xmlrpc.client import ServerProxy, Error
+import requests
 from .models.usagelog import UsageLog
 from pyramid import threadlocal
 
@@ -56,27 +57,44 @@ def demarkdown(string):
 
 
 def send(channel, message, msgshort, request):
-    """Send resulting message to IRC over XMLRPC."""
+    """Send resulting message to IRC via Anope JSON-RPC (BotServ SAY)."""
     message = message.replace('\n', ' ').replace('\r', '')
     print(f"Host: {request.host} host URL: {request.host_url}")
     if '.dev' in request.host:
-        serverurl = request.registry.settings['xml_devproxy']
+        serverurl = request.registry.settings['rpc_devproxy']
+        token = request.registry.settings['rpc_devtoken']
     else:
-        serverurl = request.registry.settings['xml_proxy']
+        serverurl = request.registry.settings['rpc_proxy']
+        token = request.registry.settings['rpc_token']
     print(f"Proxy: {serverurl}")
-    proxy = ServerProxy(serverurl)
+    # Anope 2.1 expects the raw token base64-encoded in a Bearer header.
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + base64.b64encode(token.encode()).decode(),
+    }
     try:
         messagesplit = [message[i:i + 475]
                         for i in range(0, len(message), 475)]
         for msgpart in messagesplit:
             log.debug(f"Sending to {channel}...")
-            log.debug(proxy.command("botserv", "ABish",
-                                    f"say {channel} {msgpart}"))
+            payload = {
+                'jsonrpc': '2.0',
+                'method': 'anope.command',
+                'params': ['ABish', 'BotServ', f'say {channel} {msgpart}'],
+                'id': 1,
+            }
+            response = requests.post(serverurl, json=payload, headers=headers,
+                                     timeout=10)
+            response.raise_for_status()
+            log.debug(response.text)
+            result = response.json()
+            if result.get('error'):
+                log.critical("ERROR" + str(result['error']))
             time.sleep(0.5)
         pickle.dump(msgshort, open("lastmessage.p", "wb"))
-    except Error as err:
+    except requests.RequestException as err:
         log.critical("ERROR" + str(err))
-    except:
+    except Exception:
         log.critical("Error sending message")
         log.critical(sys.exc_info())
         return

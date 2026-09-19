@@ -195,8 +195,8 @@ def github(prequest):
             message = "Empty commit event ignored"
         elif len(request['commits']) == 1:
             message = (f"\x0314 {request['sender']['login']} \x03pushed "
-                       f"{request['commits'][0]['id'][:7]}: \"" 
-                       f"{request['commits'][0]['message']}\" to "
+                       f"{request['commits'][0]['id'][:7]}: \""
+                       f"{demarkdown(request['commits'][0]['message'])}\" to "
                        f"\x0306{request['repository']['name']}/"
                        f"{request['ref'].split('/')[-1]}\x03. \x02\x0311{request['compare']}\x02\x03")
         else:

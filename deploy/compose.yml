@@ -1,0 +1,23 @@
+# Deployed as /home/fuelrats/announcer/compose.yml (project "announcer"); see deploy/README.md.
+name: announcer
+services:
+  fr-announcer:
+    image: fr-announcer:${ANNOUNCER_TAG:?set ANNOUNCER_TAG in .env}
+    # Host network: Anope JSON-RPC is on 127.0.0.1:6080 and nginx proxies to 127.0.0.1:2006.
+    network_mode: host
+    # pserve has no SIGTERM handler and would ignore it as PID 1.
+    init: true
+    user: "1000:1000"
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    # /data holds run.ini, the sqlite and the pickles; it is the working dir, so relative paths land there.
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./data:/data
+    stop_grace_period: 10s
+    restart: unless-stopped

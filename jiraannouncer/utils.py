@@ -20,16 +20,6 @@ log = logging.getLogger(__name__)
 registry = threadlocal.get_current_registry()
 
 
-def from_hex(mystr):
-    print(mystr)
-    try:
-        return bytes.fromhex(mystr).decode('utf-8')
-    except TypeError:
-        return "Unregistered Carrier"
-    except ValueError:
-        return "Unregistered Carrier"
-
-
 def logprint(string):
     """Convert input to string, and print to log, ignoring non-ascii characters."""
     logging.debug(str(string).encode('ascii', 'ignore').decode())

@@ -8,8 +8,6 @@ def includeme(config):
     config.add_route('client', '/client')
     config.add_route('statuspage', '/statuspage')
     config.add_route('updater', '/updater')
-    config.add_route('upsource', '/upsource')
-    config.add_route('teamcity', '/teamcity')
     config.add_route('api', '/api')
     config.add_route('drill', '/drill')
     config.add_route('outliner', '/outliner')

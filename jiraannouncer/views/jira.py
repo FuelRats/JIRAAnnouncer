@@ -4,7 +4,7 @@ import time
 import simplejson
 from pyramid.view import view_config
 
-from ..utils import send, getlast, devsay
+from ..utils import send, getlast, devsay, valid_token
 import logging
 
 log = logging.getLogger(__name__)
@@ -14,6 +14,10 @@ OFFSET = 5
 @view_config(route_name='jira', renderer="json")
 def jira(request):
     """Handle JIRA events."""
+    if not valid_token(request, 'jira_token'):
+        log.error("Missing or invalid token on a JIRA event, ignoring it.")
+        request.response.status = 403
+        return {'error': 'Invalid token'}
     lastmessage = getlast()
     try:
         data = request.json_body

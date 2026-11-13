@@ -1,7 +1,7 @@
 import simplejson
 from pyramid.view import view_config
 
-from ..utils import send
+from ..utils import send, valid_token
 import logging
 
 log = logging.getLogger(__name__)
@@ -39,6 +39,10 @@ componentOptions = {
 @view_config(route_name='statuspage', renderer='json')
 def statuspage(request):
     """Handle StatusPage updates"""
+    if not valid_token(request, 'statuspage_token'):
+        log.error("Missing or invalid token on a StatusPage update, ignoring it.")
+        request.response.status = 403
+        return {'error': 'Invalid token'}
     if request.body is None:
         log.error("Empty StatusPage request received, aborting.")
         return

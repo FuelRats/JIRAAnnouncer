@@ -1,5 +1,4 @@
 import stripe
-from pyramid.httpexceptions import HTTPError
 from pyramid.view import view_config
 from ..utils import send
 import logging
@@ -29,13 +28,24 @@ def get_current_month():
 
 @view_config(route_name='stripe', renderer="json")
 def mystripe(request):
-    stripe.api_key = request.registry.settings['stripe_key']
-    data = request.json_body
+    settings = request.registry.settings
+    stripe.api_key = settings['stripe_key']
+    webhook_secret = settings.get('stripe_webhook_secret')
+    if not webhook_secret:
+        log.error("stripe_webhook_secret is not set, ignoring Stripe event.")
+        request.response.status = 403
+        return {'error': 'Signature verification failed'}
     try:
-        event = stripe.Event.construct_from(data, stripe.api_key)
+        event = stripe.Webhook.construct_event(request.body, request.headers.get('Stripe-Signature', ''),
+                                               webhook_secret)
     except ValueError as e:
-        print(f"Invalid payload: {e}")
-        return HTTPError(detail='Invalid payload')
+        log.error(f"Invalid Stripe payload: {e}")
+        request.response.status = 400
+        return {'error': 'Invalid payload'}
+    except stripe.SignatureVerificationError:
+        log.error("Stripe signature verification failed, ignoring event.")
+        request.response.status = 403
+        return {'error': 'Signature verification failed'}
     if event.type == 'payment_intent.succeeded':
         payment_intent = event.data.object
         decimalplace = len(str(payment_intent.amount))-2

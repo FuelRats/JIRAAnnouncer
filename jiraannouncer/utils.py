@@ -1,6 +1,7 @@
 import base64
 import logging
 import graypy
+import hmac
 import pickle
 import re
 import sys
@@ -20,14 +21,16 @@ log = logging.getLogger(__name__)
 registry = threadlocal.get_current_registry()
 
 
-def from_hex(mystr):
-    print(mystr)
-    try:
-        return bytes.fromhex(mystr).decode('utf-8')
-    except TypeError:
-        return "Unregistered Carrier"
-    except ValueError:
-        return "Unregistered Carrier"
+def valid_token(request, setting):
+    """Check the request's ?token= against the shared secret named by setting.
+
+    Fails closed: a missing setting or a missing token is a mismatch.
+    """
+    expected = request.registry.settings.get(setting)
+    supplied = request.GET.get('token')
+    if not expected or supplied is None:
+        return False
+    return hmac.compare_digest(supplied.encode('utf8'), expected.encode('utf8'))
 
 
 def logprint(string):

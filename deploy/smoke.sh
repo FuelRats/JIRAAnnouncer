@@ -1,10 +1,12 @@
 #!/bin/sh
 # Smoke test for a JIRAAnnouncer test instance.
 #
-# Usage: smoke.sh BASE_URL METRICS_URL STUB_LOG
+# Usage: SMOKE_SECRET=... smoke.sh BASE_URL METRICS_URL STUB_LOG
 #   BASE_URL     the instance, for example http://127.0.0.1:2007
 #   METRICS_URL  its Prometheus endpoint, for example http://127.0.0.1:6800/metrics
 #   STUB_LOG     the --log file of the deploy/stub.py that the instance's ini points at
+#   SMOKE_SECRET the test ini's jira_token, statuspage_token and stripe_webhook_secret
+#                (one placeholder value for all three)
 #
 # Run it only against an instance whose rpc_proxy, rpc_devproxy, fr_url and
 # api_url point at deploy/stub.py: the POST checks make the app send IRC
@@ -12,7 +14,7 @@
 # request was served; the caller checks that kennel.p was written.
 #
 # It prints one line per check and exits non-zero on the first failure.
-# POSIX sh: runs under busybox sh (curlimages/curl image) and dash.
+# POSIX sh (busybox sh or dash); needs curl, and openssl to sign the Stripe event.
 
 set -u
 
@@ -23,6 +25,7 @@ fi
 BASE_URL=${1%/}
 METRICS_URL=$2
 STUB_LOG=$3
+SMOKE_SECRET=${SMOKE_SECRET:?set SMOKE_SECRET to the token and webhook secret of the test ini}
 
 CURL_TIMEOUT=30   # seconds per request; the /jira view alone sleeps 2 s
 LOG_WAIT=5        # seconds to wait for an expected stub log line
@@ -35,6 +38,11 @@ STRIPE_EVENT='{"id":"evt_smoke","object":"event","type":"payment_intent.succeede
 # The fields views/jira.py reads on the OV- automation path. issue_event_type_name
 # is read by the duplicate check when the previous message was the same event.
 JIRA_EVENT='{"webhookEvent":"jira:issue_updated","issue_event_type_name":"issue_generic","user":{"displayName":"Fuel Rats Automation"},"issue":{"key":"OV-1","fields":{}}}'
+
+STATUSPAGE_EVENT='{"page":{"status_indicator":"none","status_description":"All Systems Operational"},"component_update":{"old_status":"operational","new_status":"major_outage"},"component":{"name":"Smoke"}}'
+
+# Routes that no longer exist and must fall through to the not-found view.
+REMOVED_ROUTES='upsource teamcity travis circle fcms'
 
 ok() { echo "ok    $*"; }
 fail() { echo "FAIL  $*"; exit 1; }
@@ -100,19 +108,54 @@ text='say #fuelrats Incoming Client: Jameson - System: Sol'
 log_has "$mark" "$text" || fail "POST /client -> $code, but the stub log has no POST /jsonrpc with '$text'"
 ok "POST /client -> $code, stub got '$text'"
 
-# 5. /stripe: a succeeded payment intent is announced (and counted in donation_totals.p).
+# 5. /stripe: an unsigned event is rejected and announces nothing.
 mark=$(log_mark)
 code=$(curl -s --max-time "$CURL_TIMEOUT" -o /dev/null -w '%{http_code}' -X POST "$BASE_URL/stripe" \
     -H 'Content-Type: application/json' --data-raw "$STRIPE_EVENT")
-served "$code" || fail "POST /stripe returned HTTP $code"
+[ "$code" = 403 ] || fail "unsigned POST /stripe returned HTTP $code, expected 403"
 text='A donation of'
-log_has "$mark" "$text" || fail "POST /stripe -> $code, but the stub log has no POST /jsonrpc with '$text'"
-ok "POST /stripe -> $code, stub got '$text'"
+! log_has "$mark" "$text" || fail "unsigned POST /stripe was announced"
+ok "unsigned POST /stripe -> 403, nothing announced"
 
-# 6. /jira: the OV- automation path writes kennel.p.
-code=$(curl -s --max-time "$CURL_TIMEOUT" -o /dev/null -w '%{http_code}' -X POST "$BASE_URL/jira" \
+# 6. /stripe: a signed succeeded payment intent is announced (and counted in donation_totals.p).
+ts=$(date +%s)
+sig=$(printf '%s' "$ts.$STRIPE_EVENT" | openssl dgst -sha256 -hmac "$SMOKE_SECRET" | sed 's/^.*= *//')
+mark=$(log_mark)
+code=$(curl -s --max-time "$CURL_TIMEOUT" -o /dev/null -w '%{http_code}' -X POST "$BASE_URL/stripe" \
+    -H 'Content-Type: application/json' -H "Stripe-Signature: t=$ts,v1=$sig" --data-raw "$STRIPE_EVENT")
+served "$code" || fail "signed POST /stripe returned HTTP $code"
+log_has "$mark" "$text" || fail "signed POST /stripe -> $code, but the stub log has no POST /jsonrpc with '$text'"
+ok "signed POST /stripe -> $code, stub got '$text'"
+
+# 7. /jira and /statuspage without a token are rejected.
+for route in jira statuspage; do
+    code=$(curl -s --max-time "$CURL_TIMEOUT" -o /dev/null -w '%{http_code}' -X POST "$BASE_URL/$route" \
+        -H 'Content-Type: application/json' --data-raw '{}')
+    [ "$code" = 403 ] || fail "POST /$route without a token returned HTTP $code, expected 403"
+done
+ok "POST /jira and /statuspage without a token -> 403"
+
+# 8. /jira with the token: the OV- automation path writes kennel.p.
+code=$(curl -s --max-time "$CURL_TIMEOUT" -o /dev/null -w '%{http_code}' -X POST "$BASE_URL/jira?token=$SMOKE_SECRET" \
     -H 'Content-Type: application/json' --data-raw "$JIRA_EVENT")
 served "$code" || fail "POST /jira returned HTTP $code"
-ok "POST /jira -> $code (the caller checks kennel.p)"
+ok "POST /jira?token=... -> $code (the caller checks kennel.p)"
 
-echo "smoke: all 6 checks passed"
+# 9. /statuspage with the token: a component change is announced in #ratchat.
+mark=$(log_mark)
+code=$(curl -s --max-time "$CURL_TIMEOUT" -o /dev/null -w '%{http_code}' -X POST "$BASE_URL/statuspage?token=$SMOKE_SECRET" \
+    -H 'Content-Type: application/json' --data-raw "$STATUSPAGE_EVENT")
+served "$code" || fail "POST /statuspage returned HTTP $code"
+text='[Component: Smoke] went from'
+log_has "$mark" "$text" || fail "POST /statuspage -> $code, but the stub log has no POST /jsonrpc with '$text'"
+ok "POST /statuspage?token=... -> $code, stub got '$text'"
+
+# 10. Removed routes answer 404.
+for route in $REMOVED_ROUTES; do
+    code=$(curl -s --max-time "$CURL_TIMEOUT" -o /dev/null -w '%{http_code}' -X POST "$BASE_URL/$route?channel=announcerdev" \
+        -H 'Content-Type: application/json' --data-raw '{}')
+    [ "$code" = 404 ] || fail "POST /$route returned HTTP $code, expected 404"
+done
+ok "POST to removed routes ($REMOVED_ROUTES) -> 404"
+
+echo "smoke: all 10 checks passed"

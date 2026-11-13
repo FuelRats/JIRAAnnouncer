@@ -1,6 +1,7 @@
 import base64
 import logging
 import graypy
+import hmac
 import pickle
 import re
 import sys
@@ -18,6 +19,18 @@ graylogger.addHandler(handler)
 
 log = logging.getLogger(__name__)
 registry = threadlocal.get_current_registry()
+
+
+def valid_token(request, setting):
+    """Check the request's ?token= against the shared secret named by setting.
+
+    Fails closed: a missing setting or a missing token is a mismatch.
+    """
+    expected = request.registry.settings.get(setting)
+    supplied = request.GET.get('token')
+    if not expected or supplied is None:
+        return False
+    return hmac.compare_digest(supplied.encode('utf8'), expected.encode('utf8'))
 
 
 def logprint(string):

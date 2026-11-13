@@ -69,6 +69,23 @@ All state lives in `/home/fuelrats/announcer/data`, owned 1000:1000, which is th
 
 The image contains no ini, sqlite or pickle.
 
+## Webhook authentication
+
+How each announcing route checks its sender:
+
+| Route | Check | `run.ini` key | Sender setting |
+|---|---|---|---|
+| `/stripe` | `Stripe-Signature`; fails closed | `stripe_webhook_secret` (the endpoint's `whsec_` signing secret) | Stripe dashboard, webhook endpoint |
+| `/jira` | `?token=`; fails closed | `jira_token` | Jira webhook URL `https://announcer.fuelrats.com/jira?token=<jira_token>` |
+| `/statuspage` | `?token=`; fails closed | `statuspage_token` | Statuspage webhook URL `https://announcer.fuelrats.com/statuspage?token=<statuspage_token>` |
+| `/api` | `X-Api-Signature` HMAC | `api_secret` | FuelRats API |
+| `/github` | `X-Hub-Signature` HMAC, skipped when the key is unset | `github_secret` | repository webhook secret |
+| `/discourse` | Discourse signature, skipped when the key is unset | `discourse_secret` | Discourse webhook secret |
+| `/client` | `X-Client-Signature` HMAC only when the header is sent; otherwise unauthenticated, posts to `#fuelrats` only | `client_secret` | rescue page |
+| `/drill` | none; channel limited to `#drillrats`, `#drillrats2`, `#drillrats3` | | drill form |
+
+The `?token=` value appears in the nginx access log, so treat that log as sensitive. To rotate a token, set the new URL at the sender and the new value in `run.ini` together, then restart the service.
+
 ## Logs
 
 ```
@@ -82,11 +99,11 @@ The same records also go to Graylog through the GELF handler in `run.ini`.
 Test only against an instance whose ini points `rpc_proxy`, `rpc_devproxy`, `fr_url` and `api_url` at `deploy/stub.py` and replaces every token. Never POST to a live-config instance: `send()` posts to whatever `rpc_proxy` names, so a test instance with prod values posts to prod IRC.
 
 - `deploy/stub.py --port 2099 --log <file>` stands in for Anope JSON-RPC and the FuelRats API. It logs method, path and JSON body of each request, never headers.
-- `deploy/smoke.sh BASE_URL METRICS_URL STUB_LOG` checks the home page, a static file and the metrics endpoint, then posts a `/client`, a `/stripe` and a `/jira` event and checks that the stub received the first two announcements. Afterwards, check that `kennel.p` in the test instance's data dir was written.
+- `SMOKE_SECRET=<value> deploy/smoke.sh BASE_URL METRICS_URL STUB_LOG` checks the home page, a static file and the metrics endpoint; posts a `/client` event; checks that an unsigned `/stripe` event and token-less `/jira` and `/statuspage` calls get 403; posts a signed `/stripe`, a `/jira` and a `/statuspage` event with the token; and checks that the removed routes answer 404. The test ini sets `jira_token`, `statuspage_token` and `stripe_webhook_secret` all to `SMOKE_SECRET`. It needs `curl` and `openssl`. Afterwards, check that `kennel.p` in the test instance's data dir was written.
 
 Example on mozzarella, with a staging instance on `127.0.0.1:2007` and its metrics on port 6800:
 
 ```
 python3 /home/fuelrats/announcer/src/deploy/stub.py --port 2099 --log /home/fuelrats/announcer/staging/stub.log &
-sh /home/fuelrats/announcer/src/deploy/smoke.sh http://127.0.0.1:2007 http://127.0.0.1:6800/metrics /home/fuelrats/announcer/staging/stub.log
+SMOKE_SECRET=localtest sh /home/fuelrats/announcer/src/deploy/smoke.sh http://127.0.0.1:2007 http://127.0.0.1:6800/metrics /home/fuelrats/announcer/staging/stub.log
 ```
